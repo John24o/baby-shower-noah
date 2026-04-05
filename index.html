@@ -354,7 +354,9 @@ body{font-family:'Montserrat',sans-serif;color:#fff;overflow:hidden;background:#
 .divider{display:flex;align-items:center;gap:10px;margin:10px 0}
 .divider span{font-size:14px;opacity:.7}
 .wave-top{position:absolute;top:0;left:0;right:0;height:60px;background:linear-gradient(180deg,rgba(255,255,255,.04),transparent)}
-.sea-floor{position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(0deg,rgba(4,50,70,.6),transparent)}
+.sea-floor{position:absolute;bottom:0;left:0;right:0;height:44px;background:linear-gradient(0deg,rgba(2,20,35,.55),transparent);z-index:5;pointer-events:none}
+.reef-layer{position:absolute;bottom:0;left:0;right:0;height:220px;pointer-events:none;overflow:hidden;z-index:3}
+.reef-layer svg{position:absolute;bottom:0;left:0;width:100%;height:100%}
 
 /* ── COUNTDOWN ───────────────────────────────────── */
 #countdown-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
@@ -1088,21 +1090,115 @@ function whaleSVG(){
     <ellipse cx="218" cy="32" rx="2" ry="4" fill="rgba(255,255,255,.35)" transform="rotate(15 218 32)"/>
   </svg>`;
 }
-/* Turtle facing LEFT → turtle-swim (RTL) */
+/* Turtle facing LEFT → turtle-swim (RTL) — v2 redesign, 3/4 view, 2 eyes */
 function turtleSVG(){
-  return `<svg viewBox="0 0 110 70" width="110" height="70" xmlns="http://www.w3.org/2000/svg">
-    <path d="M30 28 Q14 16 8 24 Q12 34 30 34Z"  fill="#2E8B57"/>
-    <path d="M30 42 Q14 54 8 46 Q12 36 30 36Z"  fill="#2E8B57"/>
-    <path d="M80 28 Q96 16 102 24 Q98 34 80 34Z" fill="#2E8B57"/>
-    <path d="M80 42 Q96 54 102 46 Q98 36 80 36Z" fill="#2E8B57"/>
-    <ellipse cx="55" cy="35" rx="32" ry="22" fill="#2E8B57"/>
-    <ellipse cx="55" cy="35" rx="24" ry="16" fill="#3CB371" opacity=".55"/>
-    <path d="M38 22 L55 18 L72 22 L72 48 L55 52 L38 48Z" fill="#228B22" opacity=".3"/>
-    <path d="M55 18 L55 52 M38 22 L72 48 M72 22 L38 48" stroke="#1A6B1A" stroke-width=".8" opacity=".35"/>
-    <ellipse cx="24" cy="35" rx="10" ry="7" fill="#2E8B57"/>
-    <circle cx="19" cy="32" r="3.5" fill="rgba(255,255,255,.85)"/>
-    <circle cx="20" cy="32" r="2"   fill="#0A2A35"/>
-    <circle cx="21" cy="31" r=".8"  fill="white"/>
+  const uid='t'+Math.random().toString(36).slice(2,6);
+  return `<svg viewBox="0 0 165 100" width="165" height="100" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="${uid}b" cx="44%" cy="38%" r="58%">
+      <stop offset="0%"   stop-color="#5EC47E"/>
+      <stop offset="52%"  stop-color="#2E8B57"/>
+      <stop offset="100%" stop-color="#1A5438"/>
+    </radialGradient>
+    <radialGradient id="${uid}s" cx="40%" cy="30%" r="54%">
+      <stop offset="0%"   stop-color="#2C6E44"/>
+      <stop offset="48%"  stop-color="#1B5232"/>
+      <stop offset="100%" stop-color="#0D3020"/>
+    </radialGradient>
+    <radialGradient id="${uid}h" cx="38%" cy="34%" r="55%">
+      <stop offset="0%"   stop-color="#4EAF75"/>
+      <stop offset="100%" stop-color="#1E6B42"/>
+    </radialGradient>
+  </defs>
+
+  <!-- Far rear flipper (right, partially hidden) -->
+  <path d="M108 57 Q126 50 143 54 Q148 64 138 69 Q124 67 110 63Z"
+    fill="#267848" opacity=".72"/>
+  <!-- Far front flipper (right, partially hidden above) -->
+  <path d="M55 40 Q44 24 30 20 Q22 28 28 37 Q40 42 52 44Z"
+    fill="#267848" opacity=".72"/>
+
+  <!-- Near rear flipper (left) -->
+  <path d="M108 65 Q122 80 136 85 Q143 77 136 70 Q123 67 111 64Z"
+    fill="#2E8B57"/>
+  <!-- Near front flipper (left) — large, prominent -->
+  <path d="M52 56 Q30 50 12 54 Q8 66 20 70 Q38 67 50 62Z"
+    fill="#2E8B57"/>
+  <!-- Flipper webbing texture -->
+  <path d="M12 54 Q22 58 36 60" stroke="rgba(255,255,255,.15)" stroke-width="1.2" fill="none"/>
+  <path d="M14 60 Q24 63 38 64" stroke="rgba(255,255,255,.1)" stroke-width="1" fill="none"/>
+
+  <!-- Body base (plastron) -->
+  <ellipse cx="80" cy="58" rx="48" ry="33" fill="url(#${uid}b)"/>
+
+  <!-- Carapace (shell on top) -->
+  <ellipse cx="80" cy="54" rx="40" ry="27" fill="url(#${uid}s)"/>
+
+  <!-- Shell scutes — vertebral row (center ridge) -->
+  <path d="M62 33 L80 27 L98 33 L98 57 L80 63 L62 57Z"
+    fill="rgba(255,255,255,.04)" stroke="#0C2E1C" stroke-width="1.5" opacity=".85"/>
+
+  <!-- Costal scutes (sides of shell) -->
+  <path d="M62 33 L50 44 L52 60 L62 57Z"
+    fill="rgba(0,0,0,.1)" stroke="#0C2E1C" stroke-width="1.2" opacity=".8"/>
+  <path d="M50 44 L44 58 L48 70 L52 62Z"
+    fill="rgba(0,0,0,.09)" stroke="#0C2E1C" stroke-width="1.1" opacity=".75"/>
+  <path d="M98 33 L110 44 L108 60 L98 57Z"
+    fill="rgba(0,0,0,.1)" stroke="#0C2E1C" stroke-width="1.2" opacity=".8"/>
+  <path d="M110 44 L116 58 L112 70 L108 62Z"
+    fill="rgba(0,0,0,.09)" stroke="#0C2E1C" stroke-width="1.1" opacity=".75"/>
+
+  <!-- Shell ridge highlight (light catches top of carapace) -->
+  <ellipse cx="74" cy="42" rx="22" ry="10" fill="rgba(255,255,255,.11)" transform="rotate(-12 74 42)"/>
+  <!-- Secondary highlight -->
+  <ellipse cx="78" cy="36" rx="10" ry="4" fill="rgba(255,255,255,.08)" transform="rotate(-8 78 36)"/>
+
+  <!-- Neck -->
+  <path d="M50 54 Q40 48 30 44 Q22 48 24 57 Q30 62 42 60 Q50 58 50 55Z"
+    fill="url(#${uid}h)"/>
+  <path d="M28 46 Q36 43 44 46" stroke="#1A5438" stroke-width="1" fill="none" opacity=".35"/>
+
+  <!-- Head (3/4 angle — slightly toward viewer) -->
+  <ellipse cx="22" cy="50" rx="19" ry="15" fill="url(#${uid}h)"/>
+  <!-- Head scale texture -->
+  <path d="M6 44 Q14 40 24 42 Q30 44 36 49" stroke="#1A5438" stroke-width="1.3" fill="none" opacity=".4"/>
+  <path d="M5 51 Q13 47 22 49" stroke="#1A5438" stroke-width="1" fill="none" opacity=".35"/>
+  <path d="M6 57 Q14 54 22 55" stroke="#1A5438" stroke-width=".9" fill="none" opacity=".3"/>
+  <!-- Head highlight -->
+  <ellipse cx="17" cy="45" rx="11" ry="6" fill="rgba(255,255,255,.09)" transform="rotate(-18 17 45)"/>
+
+  <!-- ═══ LEFT EYE (main, fully visible) ═══ -->
+  <!-- Outer sclera ring -->
+  <circle cx="15" cy="44" r="7.5" fill="#0C1C0C"/>
+  <!-- Iris -->
+  <circle cx="15" cy="44" r="6.5" fill="#1C3424"/>
+  <!-- Pupil (vertical slit like real sea turtle) -->
+  <ellipse cx="15" cy="44" rx="3" ry="4.5" fill="#050A05"/>
+  <!-- Main specular highlight -->
+  <ellipse cx="17.5" cy="41" rx="2.5" ry="1.8" fill="rgba(255,255,255,.95)"/>
+  <!-- Secondary shine -->
+  <circle cx="12.5" cy="46.5" r="1" fill="rgba(255,255,255,.4)"/>
+  <!-- Amber eye ring (realistic sea turtle eye color) -->
+  <circle cx="15" cy="44" r="7" fill="none" stroke="rgba(200,160,60,.6)" stroke-width="1.1"/>
+
+  <!-- ═══ RIGHT EYE (3/4 view — partially visible at head angle) ═══ -->
+  <circle cx="24" cy="37" r="5" fill="#0C1C0C"/>
+  <circle cx="24" cy="37" r="4.2" fill="#1C3424"/>
+  <ellipse cx="24" cy="37" rx="2" ry="3" fill="#050A05"/>
+  <ellipse cx="25.8" cy="34.8" rx="1.7" ry="1.2" fill="rgba(255,255,255,.9)"/>
+  <circle cx="24" cy="37" r="4.6" fill="none" stroke="rgba(200,160,60,.5)" stroke-width=".9"/>
+
+  <!-- Nostrils (paired, realistic placement at beak tip) -->
+  <ellipse cx="5"  cy="47"   rx="1.5" ry="1"   fill="#0D2E1A" opacity=".65"/>
+  <ellipse cx="5"  cy="50.5" rx="1.5" ry="1"   fill="#0D2E1A" opacity=".65"/>
+
+  <!-- Beak / mouth line -->
+  <path d="M3 53 Q11 58 20 56" stroke="#1A5438" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".5"/>
+
+  <!-- Claw tips on front flipper -->
+  <path d="M12 56 L8 60" stroke="#0D2E1A" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
+  <path d="M16 58 L13 63" stroke="#0D2E1A" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
+  <path d="M20 59 L18 64" stroke="#0D2E1A" stroke-width="1.4" stroke-linecap="round" opacity=".4"/>
   </svg>`;
 }
 function jellyfishSVG(color){
@@ -1443,10 +1539,196 @@ function initCreatures(){
   setTimeout(()=>sched(spawnNemoAndDory,55000,20000), 70000);
 }
 
+/* ══════════════════════════════════════════════════════
+   CORAL REEF — panoramic SVG background for each section
+══════════════════════════════════════════════════════ */
+function coralReefSVG(v=0){
+  // v=0,1,2 gives subtle layout variation
+  const ox=v*80; // horizontal offset for variety
+  return `<svg viewBox="0 0 820 220" preserveAspectRatio="xMidYMax slice"
+    xmlns="http://www.w3.org/2000/svg">
+
+  <!-- ── SANDY / ROCKY SUBSTRATE ───────────────────── -->
+  <path d="M0 185 Q120 175 240 182 Q360 190 480 178 Q600 168 720 178 Q770 183 820 175 L820 220 L0 220Z"
+    fill="#8A6D42" opacity=".32"/>
+  <path d="M0 195 Q100 188 200 193 Q350 200 500 190 Q650 182 820 190 L820 220 L0 220Z"
+    fill="#7A5E35" opacity=".28"/>
+
+  <!-- ── LIGHT RAYS (subtle, from surface) ─────────── -->
+  <path d="M${200+ox} 0 L${150+ox} 220" stroke="rgba(180,230,255,.04)" stroke-width="28"/>
+  <path d="M${420+ox} 0 L${380+ox} 220" stroke="rgba(180,230,255,.03)" stroke-width="20"/>
+  <path d="M${640+ox} 0 L${610+ox} 220" stroke="rgba(180,230,255,.035)" stroke-width="24"/>
+
+  <!-- ══ FAR BACKGROUND CORALS (lighter, depth) ═════ -->
+  <!-- Brain coral far-left -->
+  <ellipse cx="${60+ox}" cy="182" rx="38" ry="25" fill="#C27850" opacity=".45"/>
+  <path d="M26 178 Q38 166 52 176 Q64 166 78 176 Q88 168 96 178"
+    stroke="#8B4A22" stroke-width="2" fill="none" opacity=".4"/>
+  <path d="M28 186 Q42 175 56 186 Q68 176 82 186 Q90 177 96 186"
+    stroke="#8B4A22" stroke-width="2" fill="none" opacity=".38"/>
+
+  <!-- Branching coral far-right -->
+  <line x1="${700+ox}" y1="220" x2="${700+ox}" y2="158" stroke="#D8603A" stroke-width="5" stroke-linecap="round" opacity=".42"/>
+  <line x1="${700+ox}" y1="176" x2="${682+ox}" y2="150" stroke="#D8603A" stroke-width="4"   stroke-linecap="round" opacity=".42"/>
+  <line x1="${700+ox}" y1="176" x2="${718+ox}" y2="152" stroke="#D8603A" stroke-width="4"   stroke-linecap="round" opacity=".42"/>
+  <circle cx="${682+ox}" cy="150" r="4.5" fill="#F08060" opacity=".45"/>
+  <circle cx="${718+ox}" cy="152" r="4.5" fill="#F08060" opacity=".45"/>
+  <circle cx="${700+ox}" cy="158" r="5"   fill="#F08060" opacity=".45"/>
+
+  <!-- Tube sponge cluster far-left-mid -->
+  <ellipse cx="${155+ox}" cy="193" rx="6" ry="18" fill="#8B5090" opacity=".5"/>
+  <ellipse cx="${163+ox}" cy="191" rx="5" ry="15" fill="#A060A8" opacity=".45"/>
+  <ellipse cx="${170+ox}" cy="194" rx="6" ry="17" fill="#8B5090" opacity=".5"/>
+  <!-- Sponge openings -->
+  <ellipse cx="${155+ox}" cy="175" rx="5" ry="3" fill="#1A0A28" opacity=".6"/>
+  <ellipse cx="${163+ox}" cy="176" rx="4" ry="2.5" fill="#1A0A28" opacity=".55"/>
+  <ellipse cx="${170+ox}" cy="177" rx="5" ry="3" fill="#1A0A28" opacity=".6"/>
+
+  <!-- ══ FOREGROUND CORALS (bold, close) ════════════ -->
+
+  <!-- ── Large branching coral LEFT (Acropora) ── -->
+  <line x1="${190+ox}" y1="220" x2="${190+ox}" y2="128" stroke="#E05830" stroke-width="9"   stroke-linecap="round"/>
+  <line x1="${190+ox}" y1="152" x2="${162+ox}" y2="112" stroke="#E05830" stroke-width="7.5" stroke-linecap="round"/>
+  <line x1="${190+ox}" y1="152" x2="${218+ox}" y2="115" stroke="#E05830" stroke-width="7.5" stroke-linecap="round"/>
+  <line x1="${162+ox}" y1="125" x2="${144+ox}" y2="100" stroke="#E05830" stroke-width="6"   stroke-linecap="round"/>
+  <line x1="${162+ox}" y1="125" x2="${178+ox}" y2="102" stroke="#E05830" stroke-width="6"   stroke-linecap="round"/>
+  <line x1="${218+ox}" y1="128" x2="${202+ox}" y2="104" stroke="#E05830" stroke-width="6"   stroke-linecap="round"/>
+  <line x1="${218+ox}" y1="128" x2="${234+ox}" y2="106" stroke="#E05830" stroke-width="6"   stroke-linecap="round"/>
+  <!-- 3rd generation branches -->
+  <line x1="${144+ox}" y1="112" x2="${134+ox}" y2="94"  stroke="#E05830" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="${144+ox}" y1="112" x2="${154+ox}" y2="96"  stroke="#E05830" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="${234+ox}" y1="118" x2="${244+ox}" y2="100" stroke="#E05830" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- Polyp tips (round, glowing) -->
+  <circle cx="${190+ox}" cy="128" r="6"   fill="#FF9872"/>
+  <circle cx="${162+ox}" cy="112" r="5.5" fill="#FF9872"/>
+  <circle cx="${218+ox}" cy="115" r="5.5" fill="#FF9872"/>
+  <circle cx="${144+ox}" cy="100" r="4.5" fill="#FF9872"/>
+  <circle cx="${178+ox}" cy="102" r="4.5" fill="#FFB090"/>
+  <circle cx="${202+ox}" cy="104" r="4.5" fill="#FF9872"/>
+  <circle cx="${234+ox}" cy="106" r="4.5" fill="#FFB090"/>
+  <circle cx="${134+ox}" cy="94"  r="4"   fill="#FF9872"/>
+  <circle cx="${154+ox}" cy="96"  r="4"   fill="#FFB090"/>
+  <circle cx="${244+ox}" cy="100" r="4"   fill="#FF9872"/>
+  <!-- Coral inner highlight -->
+  <line x1="${190+ox}" y1="220" x2="${190+ox}" y2="128" stroke="rgba(255,180,120,.2)" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- ── Sea Anemone CENTER-LEFT ── -->
+  <ellipse cx="${340+ox}" cy="202" rx="18" ry="9" fill="#A04828" opacity=".7"/>
+  <path d="M328 202 Q323 182 321 168" stroke="#F0609A" stroke-width="4.5" fill="none" stroke-linecap="round" opacity=".85"/>
+  <path d="M333 202 Q330 180 334 165" stroke="#FF80B0" stroke-width="4.5" fill="none" stroke-linecap="round" opacity=".85"/>
+  <path d="M340 202 Q338 178 342 163" stroke="#F0609A" stroke-width="4.5" fill="none" stroke-linecap="round" opacity=".85"/>
+  <path d="M347 202 Q349 180 345 165" stroke="#FF80B0" stroke-width="4.5" fill="none" stroke-linecap="round" opacity=".85"/>
+  <path d="M352 202 Q357 182 353 168" stroke="#F0609A" stroke-width="4.5" fill="none" stroke-linecap="round" opacity=".85"/>
+  <!-- Anemone tentacle tips (bulbous) -->
+  <circle cx="${321+ox}" cy="168" r="5"   fill="#FF5090"/>
+  <circle cx="${334+ox}" cy="165" r="5"   fill="#FF70A8"/>
+  <circle cx="${342+ox}" cy="163" r="5.5" fill="#FF5090"/>
+  <circle cx="${345+ox}" cy="165" r="5"   fill="#FF70A8"/>
+  <circle cx="${353+ox}" cy="168" r="5"   fill="#FF5090"/>
+  <!-- Anemone center glow -->
+  <ellipse cx="${340+ox}" cy="198" rx="8" ry="5" fill="rgba(255,120,160,.3)"/>
+
+  <!-- ── Large Brain Coral CENTER ── -->
+  <ellipse cx="${500+ox}" cy="187" rx="58" ry="38" fill="#C87848" opacity=".78"/>
+  <ellipse cx="${500+ox}" cy="183" rx="48" ry="30" fill="#B86838" opacity=".55"/>
+  <!-- Brain coral meanders (convolutions) -->
+  <path d="M452 180 Q464 164 478 177 Q490 164 504 177 Q516 164 530 177 Q542 164 550 177"
+    stroke="#7A3818" stroke-width="2.8" fill="none" opacity=".65"/>
+  <path d="M454 190 Q468 175 484 188 Q496 175 510 188 Q524 175 538 188 Q548 177 550 188"
+    stroke="#7A3818" stroke-width="2.8" fill="none" opacity=".62"/>
+  <path d="M458 200 Q474 186 490 199 Q503 186 518 199 Q532 186 544 199"
+    stroke="#7A3818" stroke-width="2.5" fill="none" opacity=".55"/>
+  <path d="M462 210 Q478 197 494 209 Q508 197 522 209 Q535 198 542 208"
+    stroke="#7A3818" stroke-width="2" fill="none" opacity=".45"/>
+  <!-- Brain coral highlight -->
+  <ellipse cx="${486+ox}" cy="170" rx="24" ry="12" fill="rgba(255,200,140,.13)"/>
+
+  <!-- ── Purple Sea Fan RIGHT ── -->
+  <line x1="${660+ox}" y1="220" x2="${660+ox}" y2="140" stroke="#7A3A98" stroke-width="6" stroke-linecap="round" opacity=".75"/>
+  <!-- Fan blades (left side) -->
+  <path d="M${660+ox} 144 Q${638+ox} 136 ${624+ox} 144 Q${628+ox} 152 ${644+ox} 149 Q${654+ox} 147 ${660+ox} 144Z"
+    fill="#9B52B8" opacity=".55"/>
+  <path d="M${660+ox} 156 Q${636+ox} 148 ${622+ox} 156 Q${626+ox} 164 ${642+ox} 161 Q${653+ox} 158 ${660+ox} 156Z"
+    fill="#9B52B8" opacity=".52"/>
+  <path d="M${660+ox} 168 Q${638+ox} 160 ${624+ox} 168 Q${628+ox} 176 ${644+ox} 173 Q${654+ox} 170 ${660+ox} 168Z"
+    fill="#9B52B8" opacity=".48"/>
+  <path d="M${660+ox} 180 Q${640+ox} 172 ${626+ox} 180 Q${630+ox} 188 ${646+ox} 185 Q${655+ox} 182 ${660+ox} 180Z"
+    fill="#9B52B8" opacity=".45"/>
+  <!-- Fan blades (right side) -->
+  <path d="M${660+ox} 144 Q${682+ox} 136 ${696+ox} 144 Q${692+ox} 152 ${676+ox} 149 Q${666+ox} 147 ${660+ox} 144Z"
+    fill="#9B52B8" opacity=".55"/>
+  <path d="M${660+ox} 156 Q${684+ox} 148 ${698+ox} 156 Q${694+ox} 164 ${678+ox} 161 Q${667+ox} 158 ${660+ox} 156Z"
+    fill="#9B52B8" opacity=".52"/>
+  <path d="M${660+ox} 168 Q${682+ox} 160 ${696+ox} 168 Q${692+ox} 176 ${676+ox} 173 Q${666+ox} 170 ${660+ox} 168Z"
+    fill="#9B52B8" opacity=".48"/>
+  <path d="M${660+ox} 180 Q${680+ox} 172 ${694+ox} 180 Q${690+ox} 188 ${674+ox} 185 Q${665+ox} 182 ${660+ox} 180Z"
+    fill="#9B52B8" opacity=".45"/>
+  <!-- Fan polyp details -->
+  <path d="M${625+ox} 144 Q${660+ox} 140 ${695+ox} 144" stroke="#C080E0" stroke-width=".8" fill="none" opacity=".4"/>
+  <path d="M${623+ox} 156 Q${660+ox} 152 ${697+ox} 156" stroke="#C080E0" stroke-width=".8" fill="none" opacity=".4"/>
+  <path d="M${625+ox} 168 Q${660+ox} 164 ${695+ox} 168" stroke="#C080E0" stroke-width=".8" fill="none" opacity=".4"/>
+
+  <!-- ── Seagrass patch CENTER ── -->
+  <path d="M${400+ox} 220 Q${395+ox} 196 ${390+ox} 178" stroke="#2A8050" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M${406+ox} 220 Q${410+ox} 194 ${408+ox} 174" stroke="#38A862" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M${412+ox} 220 Q${416+ox} 198 ${422+ox} 180" stroke="#2A8050" stroke-width="3"   fill="none" stroke-linecap="round"/>
+  <path d="M${396+ox} 220 Q${390+ox} 196 ${384+ox} 180" stroke="#38A862" stroke-width="3"   fill="none" stroke-linecap="round"/>
+  <path d="M${418+ox} 220 Q${424+ox} 200 ${428+ox} 184" stroke="#2A8050" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M${390+ox} 220 Q${384+ox} 198 ${380+ox} 186" stroke="#38A862" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- ── Small coral clusters / rubble ── -->
+  <circle cx="${270+ox}" cy="202" r="9"   fill="#E06840" opacity=".62"/>
+  <circle cx="${280+ox}" cy="197" r="7"   fill="#E87858" opacity=".58"/>
+  <circle cx="${258+ox}" cy="206" r="7.5" fill="#FF8860" opacity=".52"/>
+  <circle cx="${272+ox}" cy="193" r="5"   fill="#FFB090" opacity=".48"/>
+
+  <circle cx="${570+ox}" cy="200" r="8"   fill="#E06840" opacity=".6"/>
+  <circle cx="${560+ox}" cy="195" r="6.5" fill="#FF8860" opacity=".55"/>
+  <circle cx="${578+ox}" cy="197" r="7"   fill="#E06840" opacity=".58"/>
+
+  <!-- ── Tube worms / Christmas tree worms ── -->
+  <line x1="${360+ox}" y1="220" x2="${357+ox}" y2="198" stroke="#38C8D0" stroke-width="2.8" stroke-linecap="round" opacity=".75"/>
+  <path d="M${357+ox} 198 Q${350+ox} 192 ${354+ox} 188 Q${360+ox} 192 ${357+ox} 198" fill="#38C8D0" opacity=".7"/>
+  <path d="M${357+ox} 198 Q${364+ox} 192 ${360+ox} 187 Q${354+ox} 192 ${357+ox} 198" fill="#50E0E8" opacity=".6"/>
+  <line x1="${368+ox}" y1="220" x2="${371+ox}" y2="194" stroke="#F090D0" stroke-width="2.8" stroke-linecap="round" opacity=".75"/>
+  <path d="M${371+ox} 194 Q${364+ox} 188 ${368+ox} 184 Q${374+ox} 188 ${371+ox} 194" fill="#F090D0" opacity=".7"/>
+  <path d="M${371+ox} 194 Q${378+ox} 188 ${374+ox} 183 Q${368+ox} 188 ${371+ox} 194" fill="#FFB0E0" opacity=".6"/>
+  <line x1="${376+ox}" y1="220" x2="${374+ox}" y2="201" stroke="#38C8D0" stroke-width="2.5" stroke-linecap="round" opacity=".65"/>
+  <path d="M${374+ox} 201 Q${368+ox} 196 ${371+ox} 192 Q${377+ox} 196 ${374+ox} 201" fill="#38C8D0" opacity=".6"/>
+  <path d="M${374+ox} 201 Q${380+ox} 196 ${376+ox} 191 Q${370+ox} 196 ${374+ox} 201" fill="#50E0E8" opacity=".5"/>
+
+  <!-- ── Small sea anemone right-side ── -->
+  <ellipse cx="${760+ox}" cy="205" rx="12" ry="6" fill="#903828" opacity=".65"/>
+  <path d="M752 205 Q749 192 748 184" stroke="#E07080" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".8"/>
+  <path d="M756 205 Q754 190 756 182" stroke="#F090A0" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".8"/>
+  <path d="M761 205 Q760 188 763 181" stroke="#E07080" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".8"/>
+  <path d="M766 205 Q768 190 766 182" stroke="#F090A0" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".8"/>
+  <path d="M770 205 Q773 192 771 184" stroke="#E07080" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".8"/>
+  <circle cx="${748+ox}" cy="184" r="4" fill="#FF6080"/>
+  <circle cx="${756+ox}" cy="182" r="4" fill="#FF80A0"/>
+  <circle cx="${763+ox}" cy="181" r="4" fill="#FF6080"/>
+  <circle cx="${766+ox}" cy="182" r="4" fill="#FF80A0"/>
+  <circle cx="${771+ox}" cy="184" r="4" fill="#FF6080"/>
+
+  <!-- ── Seagrass right ── -->
+  <path d="M${740+ox} 220 Q${736+ox} 198 ${732+ox} 180" stroke="#2A8050" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M${746+ox} 220 Q${750+ox} 196 ${748+ox} 178" stroke="#38A862" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M${752+ox} 220 Q${756+ox} 200 ${760+ox} 182" stroke="#2A8050" stroke-width="3"   fill="none" stroke-linecap="round"/>
+  <path d="M${736+ox} 220 Q${728+ox} 198 ${724+ox} 184" stroke="#38A862" stroke-width="3"   fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+
 /* ── BOOT ───────────────────────────────────────────── */
 window.addEventListener('load',()=>{
   initBioCanvas();
   initCreatures();
+  // Inject coral reef layer into every section
+  document.querySelectorAll('.section').forEach((sec,i)=>{
+    const rd=document.createElement('div');
+    rd.className='reef-layer';
+    rd.innerHTML=coralReefSVG(i%3);
+    sec.appendChild(rd);
+  });
 });
 </script>
 </body>
