@@ -10,7 +10,7 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 html{font-size:16px;-webkit-tap-highlight-color:transparent}
-body{font-family:'Montserrat',sans-serif;color:#fff;overflow:hidden;background:#020D1A}
+body{font-family:'Montserrat',sans-serif;color:#fff;overflow:hidden;background:#077890}
 
 :root{
   --teal:#38C5D0;--teal2:#5DD8E0;--aqua:#B2EEF4;
@@ -169,6 +169,8 @@ body{font-family:'Montserrat',sans-serif;color:#fff;overflow:hidden;background:#
   min-height:100vh;min-height:calc(var(--vh,1vh)*100);
   scroll-snap-align:start;scroll-snap-stop:always;
   position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;
+  background:transparent;
+  contain:paint;
 }
 
 /* ── ANIMATION SYSTEM ────────────────────────────── */
@@ -354,7 +356,7 @@ body{font-family:'Montserrat',sans-serif;color:#fff;overflow:hidden;background:#
 .divider{display:flex;align-items:center;gap:10px;margin:10px 0}
 .divider span{font-size:14px;opacity:.7}
 .wave-top{position:absolute;top:0;left:0;right:0;height:60px;background:linear-gradient(180deg,rgba(255,255,255,.04),transparent)}
-.sea-floor{position:absolute;bottom:0;left:0;right:0;height:44px;background:linear-gradient(0deg,rgba(2,20,35,.55),transparent);z-index:5;pointer-events:none}
+.sea-floor{position:absolute;bottom:0;left:0;right:0;height:32px;background:linear-gradient(0deg,rgba(5,80,100,.22),transparent);z-index:5;pointer-events:none}
 .reef-layer{position:fixed;bottom:0;left:0;right:0;height:220px;pointer-events:none;overflow:hidden;z-index:4}
 .reef-layer svg{position:absolute;bottom:0;left:0;width:100%;height:100%}
 
