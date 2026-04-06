@@ -999,20 +999,20 @@ function _tick(gen){
 }
 
 function startMusic(){
+  musicPlaying=true;             // ← primero, antes del tick
   _ensureCtx();
   _gen++;
   _lastScheduled=-1;
-  /* Fade in rápido */
   _mg.gain.cancelScheduledValues(_ac.currentTime);
   _mg.gain.setValueAtTime(0,_ac.currentTime);
   _mg.gain.linearRampToValueAtTime(0.92,_ac.currentTime+.35);
   _tick(_gen);
 }
 function stopMusic(){
-  _gen++;                        // invalida todos los callbacks pendientes
+  musicPlaying=false;            // ← primero, invalida el tick
+  _gen++;
   clearTimeout(_schedTimer);
   if(_ac&&_mg){
-    /* Fade out rápido antes de silenciar */
     _mg.gain.cancelScheduledValues(_ac.currentTime);
     _mg.gain.setValueAtTime(_mg.gain.value,_ac.currentTime);
     _mg.gain.linearRampToValueAtTime(0,_ac.currentTime+.4);
@@ -1020,19 +1020,16 @@ function stopMusic(){
 }
 
 function toggleMusic(){
-  /* Evitar doble clic simultáneo */
   musicBtn.disabled=true;
-  setTimeout(()=>musicBtn.disabled=false,500);
+  setTimeout(()=>musicBtn.disabled=false,450);
   if(musicPlaying){
     stopMusic();
     musicBtn.classList.remove('playing');
     musicBtn.textContent='♪';
-    musicPlaying=false;
   } else {
     startMusic();
     musicBtn.classList.add('playing');
     musicBtn.textContent='🎵';
-    musicPlaying=true;
   }
 }
 musicBtn.addEventListener('click',toggleMusic);
@@ -1375,114 +1372,121 @@ function whaleSVG(){
   </svg>`;
 }
 /* Turtle facing LEFT → turtle-swim (RTL) — v2 redesign, 3/4 view, 2 eyes */
+/* Turtle — vista lateral, UN solo ojo hermoso */
 function turtleSVG(){
   const uid='t'+Math.random().toString(36).slice(2,6);
-  return `<svg viewBox="0 0 165 100" width="165" height="100" xmlns="http://www.w3.org/2000/svg">
+  return `<svg viewBox="0 0 178 108" width="178" height="108" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <radialGradient id="${uid}b" cx="44%" cy="38%" r="58%">
-      <stop offset="0%"   stop-color="#5EC47E"/>
-      <stop offset="52%"  stop-color="#2E8B57"/>
+    <radialGradient id="${uid}sh" cx="42%" cy="30%" r="56%">
+      <stop offset="0%"   stop-color="#3CA865"/>
+      <stop offset="50%"  stop-color="#217A42"/>
+      <stop offset="100%" stop-color="#0E4220"/>
+    </radialGradient>
+    <radialGradient id="${uid}sk" cx="40%" cy="35%" r="58%">
+      <stop offset="0%"   stop-color="#52C47A"/>
+      <stop offset="55%"  stop-color="#2E8B57"/>
       <stop offset="100%" stop-color="#1A5438"/>
     </radialGradient>
-    <radialGradient id="${uid}s" cx="40%" cy="30%" r="54%">
-      <stop offset="0%"   stop-color="#2C6E44"/>
-      <stop offset="48%"  stop-color="#1B5232"/>
-      <stop offset="100%" stop-color="#0D3020"/>
+    <radialGradient id="${uid}hd" cx="38%" cy="34%" r="55%">
+      <stop offset="0%"   stop-color="#58C882"/>
+      <stop offset="100%" stop-color="#267848"/>
     </radialGradient>
-    <radialGradient id="${uid}h" cx="38%" cy="34%" r="55%">
-      <stop offset="0%"   stop-color="#4EAF75"/>
-      <stop offset="100%" stop-color="#1E6B42"/>
+    <radialGradient id="${uid}ir" cx="34%" cy="30%" r="62%">
+      <stop offset="0%"   stop-color="#D4A820"/>
+      <stop offset="55%"  stop-color="#A07810"/>
+      <stop offset="100%" stop-color="#5A4005"/>
     </radialGradient>
   </defs>
 
-  <!-- Far rear flipper (right, partially hidden) -->
-  <path d="M108 57 Q126 50 143 54 Q148 64 138 69 Q124 67 110 63Z"
-    fill="#267848" opacity=".72"/>
-  <!-- Far front flipper (right, partially hidden above) -->
-  <path d="M55 40 Q44 24 30 20 Q22 28 28 37 Q40 42 52 44Z"
-    fill="#267848" opacity=".72"/>
+  <!-- ALETA TRASERA LEJANA (lado opuesto) -->
+  <path d="M134 64 Q152 56 165 58 Q168 68 160 74 Q148 72 136 68Z"
+    fill="#1E6B40" opacity=".55"/>
+  <!-- ALETA DELANTERA LEJANA -->
+  <path d="M84 58 Q76 42 62 36 Q55 44 60 52 Q70 56 82 60Z"
+    fill="#1E6B40" opacity=".55"/>
 
-  <!-- Near rear flipper (left) -->
-  <path d="M108 65 Q122 80 136 85 Q143 77 136 70 Q123 67 111 64Z"
-    fill="#2E8B57"/>
-  <!-- Near front flipper (left) — large, prominent -->
-  <path d="M52 56 Q30 50 12 54 Q8 66 20 70 Q38 67 50 62Z"
-    fill="#2E8B57"/>
-  <!-- Flipper webbing texture -->
-  <path d="M12 54 Q22 58 36 60" stroke="rgba(255,255,255,.15)" stroke-width="1.2" fill="none"/>
-  <path d="M14 60 Q24 63 38 64" stroke="rgba(255,255,255,.1)" stroke-width="1" fill="none"/>
+  <!-- COLA -->
+  <path d="M152 65 Q166 60 172 65 Q166 70 152 69Z" fill="#267848"/>
 
-  <!-- Body base (plastron) -->
-  <ellipse cx="80" cy="58" rx="48" ry="33" fill="url(#${uid}b)"/>
+  <!-- PLASTRON (vientre) -->
+  <ellipse cx="108" cy="72" rx="52" ry="20" fill="#3DA862"/>
 
-  <!-- Carapace (shell on top) -->
-  <ellipse cx="80" cy="54" rx="40" ry="27" fill="url(#${uid}s)"/>
+  <!-- CAPARAZÓN — domo principal -->
+  <path d="M60 66 Q64 28 108 20 Q152 28 156 66 Q156 82 108 86 Q60 82 60 66Z"
+    fill="url(#${uid}sh)" stroke="#0D3020" stroke-width="1.5"/>
 
-  <!-- Shell scutes — vertebral row (center ridge) -->
-  <path d="M62 33 L80 27 L98 33 L98 57 L80 63 L62 57Z"
-    fill="rgba(255,255,255,.04)" stroke="#0C2E1C" stroke-width="1.5" opacity=".85"/>
+  <!-- Patrón de escamas del caparazón -->
+  <!-- Escudo vertebral central -->
+  <path d="M86 32 L108 24 L130 32 L132 62 L108 68 L84 62Z"
+    fill="rgba(255,255,255,.05)" stroke="#0A2810" stroke-width="2" opacity=".8"/>
+  <!-- Escudos costales izquierdos -->
+  <path d="M86 32 L66 46 L68 64 L84 62Z"
+    fill="rgba(0,0,0,.08)" stroke="#0A2810" stroke-width="1.4" opacity=".75"/>
+  <path d="M66 46 L62 66 L65 78 L68 66Z"
+    fill="rgba(0,0,0,.07)" stroke="#0A2810" stroke-width="1.2" opacity=".65"/>
+  <!-- Escudos costales derechos -->
+  <path d="M130 32 L150 46 L148 64 L132 62Z"
+    fill="rgba(0,0,0,.08)" stroke="#0A2810" stroke-width="1.4" opacity=".75"/>
+  <path d="M150 46 L154 66 L151 78 L148 66Z"
+    fill="rgba(0,0,0,.07)" stroke="#0A2810" stroke-width="1.2" opacity=".65"/>
+  <!-- Brillo del caparazón -->
+  <ellipse cx="102" cy="42" rx="32" ry="13" fill="rgba(255,255,255,.13)" transform="rotate(-8 102 42)"/>
+  <ellipse cx="100" cy="34" rx="15" ry="5" fill="rgba(255,255,255,.09)"/>
 
-  <!-- Costal scutes (sides of shell) -->
-  <path d="M62 33 L50 44 L52 60 L62 57Z"
-    fill="rgba(0,0,0,.1)" stroke="#0C2E1C" stroke-width="1.2" opacity=".8"/>
-  <path d="M50 44 L44 58 L48 70 L52 62Z"
-    fill="rgba(0,0,0,.09)" stroke="#0C2E1C" stroke-width="1.1" opacity=".75"/>
-  <path d="M98 33 L110 44 L108 60 L98 57Z"
-    fill="rgba(0,0,0,.1)" stroke="#0C2E1C" stroke-width="1.2" opacity=".8"/>
-  <path d="M110 44 L116 58 L112 70 L108 62Z"
-    fill="rgba(0,0,0,.09)" stroke="#0C2E1C" stroke-width="1.1" opacity=".75"/>
+  <!-- ALETA DELANTERA VISIBLE -->
+  <path d="M82 64 Q66 76 48 86 Q43 76 48 69 Q62 65 80 66Z"
+    fill="url(#${uid}sk)" stroke="#0D3020" stroke-width="1.2"/>
+  <!-- Textura de la aleta -->
+  <path d="M50 84 Q58 78 68 75" stroke="rgba(255,255,255,.18)" stroke-width="1" fill="none"/>
+  <path d="M48 76 Q56 72 66 70" stroke="rgba(255,255,255,.14)" stroke-width=".9" fill="none"/>
 
-  <!-- Shell ridge highlight (light catches top of carapace) -->
-  <ellipse cx="74" cy="42" rx="22" ry="10" fill="rgba(255,255,255,.11)" transform="rotate(-12 74 42)"/>
-  <!-- Secondary highlight -->
-  <ellipse cx="78" cy="36" rx="10" ry="4" fill="rgba(255,255,255,.08)" transform="rotate(-8 78 36)"/>
+  <!-- ALETA TRASERA VISIBLE -->
+  <path d="M136 66 Q148 80 158 84 Q162 74 156 68 Q148 66 138 66Z"
+    fill="url(#${uid}sk)" stroke="#0D3020" stroke-width="1.2"/>
 
-  <!-- Neck -->
-  <path d="M50 54 Q40 48 30 44 Q22 48 24 57 Q30 62 42 60 Q50 58 50 55Z"
-    fill="url(#${uid}h)"/>
-  <path d="M28 46 Q36 43 44 46" stroke="#1A5438" stroke-width="1" fill="none" opacity=".35"/>
+  <!-- CUELLO -->
+  <path d="M62 62 Q55 54 48 52 Q40 56 42 66 Q46 73 56 70 Q64 67 64 64Z"
+    fill="url(#${uid}hd)"/>
 
-  <!-- Head (3/4 angle — slightly toward viewer) -->
-  <ellipse cx="22" cy="50" rx="19" ry="15" fill="url(#${uid}h)"/>
-  <!-- Head scale texture -->
-  <path d="M6 44 Q14 40 24 42 Q30 44 36 49" stroke="#1A5438" stroke-width="1.3" fill="none" opacity=".4"/>
-  <path d="M5 51 Q13 47 22 49" stroke="#1A5438" stroke-width="1" fill="none" opacity=".35"/>
-  <path d="M6 57 Q14 54 22 55" stroke="#1A5438" stroke-width=".9" fill="none" opacity=".3"/>
-  <!-- Head highlight -->
-  <ellipse cx="17" cy="45" rx="11" ry="6" fill="rgba(255,255,255,.09)" transform="rotate(-18 17 45)"/>
+  <!-- CABEZA — perfil lateral izquierdo -->
+  <ellipse cx="36" cy="58" rx="24" ry="18" fill="url(#${uid}hd)"
+    stroke="#0D3020" stroke-width="1.4"/>
+  <!-- Textura de escamas en la cabeza -->
+  <path d="M16 50 Q28 46 42 49" stroke="#1A5438" stroke-width="1.3" fill="none" opacity=".45"/>
+  <path d="M14 58 Q26 55 40 57" stroke="#1A5438" stroke-width="1.1" fill="none" opacity=".38"/>
+  <path d="M16 65 Q27 63 38 63" stroke="#1A5438" stroke-width=".9" fill="none" opacity=".3"/>
+  <!-- Brillo de la cabeza -->
+  <ellipse cx="30" cy="50" rx="13" ry="6" fill="rgba(255,255,255,.12)" transform="rotate(-18 30 50)"/>
 
-  <!-- ═══ LEFT EYE (main, fully visible) ═══ -->
-  <!-- Outer sclera ring -->
-  <circle cx="15" cy="44" r="7.5" fill="#0C1C0C"/>
-  <!-- Iris -->
-  <circle cx="15" cy="44" r="6.5" fill="#1C3424"/>
-  <!-- Pupil (vertical slit like real sea turtle) -->
-  <ellipse cx="15" cy="44" rx="3" ry="4.5" fill="#050A05"/>
-  <!-- Main specular highlight -->
-  <ellipse cx="17.5" cy="41" rx="2.5" ry="1.8" fill="rgba(255,255,255,.95)"/>
-  <!-- Secondary shine -->
-  <circle cx="12.5" cy="46.5" r="1" fill="rgba(255,255,255,.4)"/>
-  <!-- Amber eye ring (realistic sea turtle eye color) -->
-  <circle cx="15" cy="44" r="7" fill="none" stroke="rgba(200,160,60,.6)" stroke-width="1.1"/>
+  <!-- ═══ UN SOLO OJO — bello, ámbar, perfil lateral ═══ -->
+  <!-- Órbita (sombra sutil alrededor) -->
+  <circle cx="24" cy="52" r="12" fill="#1E6040" opacity=".7"/>
+  <!-- Esclerótica blanca -->
+  <circle cx="24" cy="52" r="10" fill="white" stroke="#0A2810" stroke-width="1.2"/>
+  <!-- Iris ámbar-dorado (color real de tortuga marina) -->
+  <circle cx="24" cy="52" r="8"  fill="url(#${uid}ir)"/>
+  <!-- Pupila oval vertical (reptil) -->
+  <ellipse cx="24" cy="52" rx="3.2" ry="5" fill="#06080A"/>
+  <!-- Reflejo principal (grande, brillante) -->
+  <ellipse cx="27.5" cy="47.5" rx="3.8" ry="2.6" fill="rgba(255,255,255,.97)"/>
+  <!-- Reflejo secundario -->
+  <circle cx="20.5" cy="55.5" r="1.6" fill="rgba(255,255,255,.45)"/>
+  <!-- Línea de párpado superior -->
+  <path d="M14 48 Q24 43 34 48" stroke="#0A2810" stroke-width="1.6" fill="none" opacity=".65" stroke-linecap="round"/>
+  <!-- Línea de párpado inferior -->
+  <path d="M14 57 Q24 61 34 57" stroke="#0A2810" stroke-width="1.1" fill="none" opacity=".4" stroke-linecap="round"/>
 
-  <!-- ═══ RIGHT EYE (3/4 view — partially visible at head angle) ═══ -->
-  <circle cx="24" cy="37" r="5" fill="#0C1C0C"/>
-  <circle cx="24" cy="37" r="4.2" fill="#1C3424"/>
-  <ellipse cx="24" cy="37" rx="2" ry="3" fill="#050A05"/>
-  <ellipse cx="25.8" cy="34.8" rx="1.7" ry="1.2" fill="rgba(255,255,255,.9)"/>
-  <circle cx="24" cy="37" r="4.6" fill="none" stroke="rgba(200,160,60,.5)" stroke-width=".9"/>
+  <!-- NARINAS -->
+  <ellipse cx="14" cy="55" rx="1.6" ry="1.1" fill="#0D2E1A" opacity=".65"/>
+  <ellipse cx="14" cy="58.5" rx="1.5" ry="1"  fill="#0D2E1A" opacity=".55"/>
+  <!-- BOCA (leve sonrisa) -->
+  <path d="M13 63 Q22 68 32 65" stroke="#0D3020" stroke-width="1.4" fill="none"
+    stroke-linecap="round" opacity=".55"/>
 
-  <!-- Nostrils (paired, realistic placement at beak tip) -->
-  <ellipse cx="5"  cy="47"   rx="1.5" ry="1"   fill="#0D2E1A" opacity=".65"/>
-  <ellipse cx="5"  cy="50.5" rx="1.5" ry="1"   fill="#0D2E1A" opacity=".65"/>
-
-  <!-- Beak / mouth line -->
-  <path d="M3 53 Q11 58 20 56" stroke="#1A5438" stroke-width="1.4" fill="none" stroke-linecap="round" opacity=".5"/>
-
-  <!-- Claw tips on front flipper -->
-  <path d="M12 56 L8 60" stroke="#0D2E1A" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
-  <path d="M16 58 L13 63" stroke="#0D2E1A" stroke-width="1.5" stroke-linecap="round" opacity=".5"/>
-  <path d="M20 59 L18 64" stroke="#0D2E1A" stroke-width="1.4" stroke-linecap="round" opacity=".4"/>
+  <!-- GARRAS en aleta delantera -->
+  <path d="M48 84 L44 90" stroke="#0D2E1A" stroke-width="1.8" stroke-linecap="round" opacity=".65"/>
+  <path d="M53 88 L50 94" stroke="#0D2E1A" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+  <path d="M58 90 L56 96" stroke="#0D2E1A" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>
   </svg>`;
 }
 function jellyfishSVG(color){
