@@ -818,19 +818,21 @@ function submitRSVP(){
 }
 
 /* ── CONFETTI ───────────────────────────────────────── */
+let _confettiFrame=null;  // módulo-nivel: cancelar animación anterior correctamente
 function launchConfetti(){
   const canvas=document.getElementById('confetti-canvas');
   const ctx=canvas.getContext('2d');
   canvas.width=innerWidth;canvas.height=innerHeight;
+  if(_confettiFrame){cancelAnimationFrame(_confettiFrame);_confettiFrame=null;}
   const COLORS=['#38C5D0','#F5C842','#FF7B6E','#B2EEF4','#fff','#7ECFC8','#C8BBFF'];
   const pieces=Array.from({length:180},()=>({x:Math.random()*canvas.width,y:-20,w:5+Math.random()*9,h:9+Math.random()*13,color:COLORS[Math.floor(Math.random()*COLORS.length)],vx:(Math.random()-.5)*6,vy:2+Math.random()*4,r:Math.random()*Math.PI*2,vr:(Math.random()-.5)*.22,life:1}));
-  let frame;
   const draw=()=>{
     ctx.clearRect(0,0,canvas.width,canvas.height);let alive=false;
     pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.vy+=.13;p.life-=.004;if(p.y<canvas.height&&p.life>0)alive=true;ctx.save();ctx.globalAlpha=Math.max(0,p.life);ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()});
-    alive?frame=requestAnimationFrame(draw):ctx.clearRect(0,0,canvas.width,canvas.height);
+    if(alive){_confettiFrame=requestAnimationFrame(draw);}
+    else{ctx.clearRect(0,0,canvas.width,canvas.height);_confettiFrame=null;}
   };
-  if(frame)cancelAnimationFrame(frame);draw();
+  draw();
 }
 
 /* ══════════════════════════════════════════════════════
@@ -844,13 +846,18 @@ let _gen=0;                       // generación: previene apilamiento al hacer 
 let _schedTimer=null;
 const musicBtn=document.getElementById('music-btn');
 
-function _ensureCtx(){
+/* _ensureCtx: crea el contexto si no existe.
+   resume=true sólo cuando hay un gesto del usuario Y queremos que el sonido inicie.
+   Nunca llamar resume() desde código que no sea respuesta directa a un gesto,
+   porque reanudar el contexto dispara todas las notas ya programadas en el pasado. */
+function _ensureCtx(doResume=false){
   if(!_ac||_ac.state==='closed'){
     _ac=new(window.AudioContext||window.webkitAudioContext)();
     _mg=_ac.createGain(); _mg.gain.value=0;
     _mg.connect(_ac.destination);
   }
-  _ac.resume(); return _ac;
+  if(doResume && _ac.state==='suspended') _ac.resume();
+  return _ac;
 }
 
 /* ── Timbres ─────────────────────────────────────────── */
@@ -977,11 +984,14 @@ const _AHEAD=2.2; // programar 2.2 s por delante
 const _TICK =1.0; // chequear cada 1 s
 
 function _schedBlock(loopStart,gen){
-  /* Programa todas las notas del siguiente bloque */
   if(!_ac||!musicPlaying||gen!==_gen) return;
-  _MEL.forEach(([f,b,d])  =>_marimba(f, loopStart+b*_Q, d*_Q*.92, .165));
-  _BASS.forEach(([f,b,d]) =>_bass(   f, loopStart+b*_Q, d*_Q*.85, .14 ));
-  _STEEL.forEach(([f,b,d])=>_steel(  f, loopStart+b*_Q, d*_Q,     .05 ));
+  /* clamp: nunca programar notas en el pasado (evita que el contexto
+     reanudado dispare todas las notas acumuladas al mismo tiempo) */
+  const floor=_ac.currentTime+0.005;
+  const w=(b)=>Math.max(loopStart+b*_Q, floor);
+  _MEL.forEach(([f,b,d])  =>_marimba(f, w(b), d*_Q*.92, .165));
+  _BASS.forEach(([f,b,d]) =>_bass(   f, w(b), d*_Q*.85, .14 ));
+  _STEEL.forEach(([f,b,d])=>_steel(  f, w(b), d*_Q,     .05 ));
 }
 
 let _loopStart=0, _lastScheduled=-1;
@@ -999,23 +1009,29 @@ function _tick(gen){
 }
 
 function startMusic(){
-  musicPlaying=true;             // ← primero, antes del tick
-  _ensureCtx();
+  musicPlaying=true;
+  _ensureCtx(true);              // resume sólo aquí (gesto del usuario: clic en ♪)
   _gen++;
   _lastScheduled=-1;
-  _mg.gain.cancelScheduledValues(_ac.currentTime);
-  _mg.gain.setValueAtTime(0,_ac.currentTime);
-  _mg.gain.linearRampToValueAtTime(0.92,_ac.currentTime+.35);
+  const now=_ac.currentTime;
+  /* Leer valor actual ANTES de cancelar para hacer fade-in suave */
+  const curVol=_mg.gain.value;
+  _mg.gain.cancelScheduledValues(now);
+  _mg.gain.setValueAtTime(curVol,now);
+  _mg.gain.linearRampToValueAtTime(0.92,now+.4);
   _tick(_gen);
 }
 function stopMusic(){
-  musicPlaying=false;            // ← primero, invalida el tick
+  musicPlaying=false;
   _gen++;
   clearTimeout(_schedTimer);
   if(_ac&&_mg){
-    _mg.gain.cancelScheduledValues(_ac.currentTime);
-    _mg.gain.setValueAtTime(_mg.gain.value,_ac.currentTime);
-    _mg.gain.linearRampToValueAtTime(0,_ac.currentTime+.4);
+    const now=_ac.currentTime;
+    /* Leer valor actual ANTES de cancelar (evita pop) */
+    const curVol=_mg.gain.value;
+    _mg.gain.cancelScheduledValues(now);
+    _mg.gain.setValueAtTime(curVol,now);
+    _mg.gain.linearRampToValueAtTime(0,now+.45);
   }
 }
 
@@ -1035,17 +1051,24 @@ function toggleMusic(){
 musicBtn.addEventListener('click',toggleMusic);
 
 /* ── Efectos de UI ───────────────────────────────────── */
-function _getCtxFx(){
-  _ensureCtx();
-  if(_mg.gain.value<0.01){_mg.gain.setValueAtTime(.6,_ac.currentTime);}
-  return _ac;
-}
+/* playReveal y playSparkle: crean contexto si hace falta (el gesto del usuario
+   viene del clic en el sobre o en el botón de RSVP).
+   NO tocan el masterGain para no interferir con la música si está corriendo. */
 function playReveal(){
-  _getCtxFx();const t=_ac.currentTime;
+  _ensureCtx(true);              // sobre = gesto del usuario → ok resumir
+  if(!_ac)return;
+  /* Si no hay música corriendo, subir gain sólo para el efecto */
+  if(!musicPlaying){
+    _mg.gain.cancelScheduledValues(_ac.currentTime);
+    _mg.gain.setValueAtTime(0.7,_ac.currentTime);
+    _mg.gain.linearRampToValueAtTime(0,_ac.currentTime+.8);
+  }
+  const t=_ac.currentTime;
   [Hz.C4,Hz.E4,Hz.G4,Hz.C5].forEach((f,i)=>_marimba(f,t+i*.12,.5,.1));
 }
 function playSparkle(){
-  _getCtxFx();const t=_ac.currentTime;
+  if(!_ac)return;                // RSVP: contexto ya existe (música o reveal lo creó)
+  const t=_ac.currentTime;
   [800,1000,1200,1600].forEach((f,i)=>_steel(f,t+i*.07,.25,.08));
 }
 
