@@ -834,129 +834,195 @@ function launchConfetti(){
 }
 
 /* ══════════════════════════════════════════════════════
-   AUDIO — Underwater Calypso Melody (original composition)
-   Caribbean / ocean feel — no vocals, just the tune
+   AUDIO — "Bajo del Mar / Under the Sea" melody
+   Instrumental, solo de marimba + bajo + shimmer calipso
+   Toggle correcto: un clic play, otro clic stop.
 ══════════════════════════════════════════════════════ */
-let audioCtx=null,musicPlaying=false,musicLoopId=null,musicStartTime=0;
+let _ac=null, _mg=null;          // AudioContext, masterGain
+let musicPlaying=false;
+let _gen=0;                       // generación: previene apilamiento al hacer clic múltiple
+let _schedTimer=null;
 const musicBtn=document.getElementById('music-btn');
-const getCtx=()=>{
-  if(!audioCtx) audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-  return audioCtx;
-};
 
-/* ── Marimba-style note player ──────────────────────── */
-function playMarimba(freq,when,dur,vol=0.18){
-  const c=getCtx();
-  /* Layer 1 — fundamental (triangle, warm) */
-  const o1=c.createOscillator(), g1=c.createGain();
+function _ensureCtx(){
+  if(!_ac||_ac.state==='closed'){
+    _ac=new(window.AudioContext||window.webkitAudioContext)();
+    _mg=_ac.createGain(); _mg.gain.value=0;
+    _mg.connect(_ac.destination);
+  }
+  _ac.resume(); return _ac;
+}
+
+/* ── Timbres ─────────────────────────────────────────── */
+function _marimba(freq,when,dur,vol=0.18){
+  if(!_ac)return;
+  /* Fundamental — triangle cálido */
+  const o1=_ac.createOscillator(),g1=_ac.createGain();
   o1.type='triangle'; o1.frequency.value=freq;
   g1.gain.setValueAtTime(0,when);
   g1.gain.linearRampToValueAtTime(vol,when+.008);
-  g1.gain.exponentialRampToValueAtTime(.001,when+dur*.9);
-  o1.connect(g1); g1.connect(c.destination);
-  o1.start(when); o1.stop(when+dur+.05);
-  /* Layer 2 — 2nd harmonic (softer, gives bell/marimba colour) */
-  const o2=c.createOscillator(), g2=c.createGain();
-  o2.type='sine'; o2.frequency.value=freq*2;
+  g1.gain.exponentialRampToValueAtTime(.001,when+Math.max(.05,dur*.88));
+  o1.connect(g1);g1.connect(_mg);o1.start(when);o1.stop(when+dur+.1);
+  /* 2° armónico — color marimba */
+  const o2=_ac.createOscillator(),g2=_ac.createGain();
+  o2.type='sine'; o2.frequency.value=freq*2.01;
   g2.gain.setValueAtTime(0,when);
-  g2.gain.linearRampToValueAtTime(vol*.28,when+.005);
-  g2.gain.exponentialRampToValueAtTime(.001,when+dur*.45);
-  o2.connect(g2); g2.connect(c.destination);
-  o2.start(when); o2.stop(when+dur*.5+.05);
-  /* Layer 3 — 3rd harmonic (very faint shimmer) */
-  const o3=c.createOscillator(), g3=c.createGain();
-  o3.type='sine'; o3.frequency.value=freq*3;
+  g2.gain.linearRampToValueAtTime(vol*.24,when+.004);
+  g2.gain.exponentialRampToValueAtTime(.001,when+dur*.38);
+  o2.connect(g2);g2.connect(_mg);o2.start(when);o2.stop(when+dur*.45+.05);
+  /* 3° armónico — brillo suave */
+  const o3=_ac.createOscillator(),g3=_ac.createGain();
+  o3.type='sine'; o3.frequency.value=freq*3.02;
   g3.gain.setValueAtTime(0,when);
-  g3.gain.linearRampToValueAtTime(vol*.08,when+.003);
-  g3.gain.exponentialRampToValueAtTime(.001,when+dur*.2);
-  o3.connect(g3); g3.connect(c.destination);
-  o3.start(when); o3.stop(when+dur*.25+.05);
+  g3.gain.linearRampToValueAtTime(vol*.07,when+.003);
+  g3.gain.exponentialRampToValueAtTime(.001,when+dur*.18);
+  o3.connect(g3);g3.connect(_mg);o3.start(when);o3.stop(when+dur*.22+.05);
 }
-/* Soft bass thump */
-function playBass(freq,when,dur,vol=0.14){
-  const c=getCtx(), o=c.createOscillator(), g=c.createGain();
+function _bass(freq,when,dur,vol=0.15){
+  if(!_ac)return;
+  const o=_ac.createOscillator(),g=_ac.createGain();
   o.type='sine'; o.frequency.value=freq;
   g.gain.setValueAtTime(0,when);
-  g.gain.linearRampToValueAtTime(vol,when+.012);
-  g.gain.exponentialRampToValueAtTime(.001,when+dur*.85);
-  o.connect(g); g.connect(c.destination);
-  o.start(when); o.stop(when+dur+.05);
+  g.gain.linearRampToValueAtTime(vol,when+.015);
+  g.gain.exponentialRampToValueAtTime(.001,when+Math.max(.05,dur*.82));
+  o.connect(g);g.connect(_mg);o.start(when);o.stop(when+dur+.06);
 }
-/* Bright shimmer (steel-drum top layer) */
-function playShimmer(freq,when,dur,vol=0.06){
-  const c=getCtx(), o=c.createOscillator(), g=c.createGain();
+function _steel(freq,when,dur,vol=0.06){
+  if(!_ac)return;
+  const o=_ac.createOscillator(),g=_ac.createGain();
   o.type='square'; o.frequency.value=freq;
   g.gain.setValueAtTime(0,when);
   g.gain.linearRampToValueAtTime(vol,when+.003);
-  g.gain.exponentialRampToValueAtTime(.001,when+dur*.3);
-  o.connect(g); g.connect(c.destination);
-  o.start(when); o.stop(when+dur*.35+.05);
+  g.gain.exponentialRampToValueAtTime(.001,when+Math.max(.02,dur*.28));
+  o.connect(g);g.connect(_mg);o.start(when);o.stop(when+dur*.32+.05);
 }
 
-/* ── Note table ─────────────────────────────────────── */
-const HZ={
-  F2:87.3, C3:130.8, F3:174.6, G3:196.0, A3:220.0, Bb3:233.1, C4:261.6, D4:293.7,
-  E4:329.6, F4:349.2, G4:392.0, A4:440.0, Bb4:466.2, C5:523.3, D5:587.3, Eb5:622.3,
-  E5:659.3, F5:698.5, G5:784.0, A5:880.0
+/* ── Notas: "Bajo del Mar / Under the Sea" — coro en Fa mayor ──
+   Tempo calipso = 116 BPM  →  negra = 0.517 s
+   Notación: [frecuencia, inicio_en_negras, duración_en_negras]
+   Duraciones: e=0.5(corchea), q=1(negra), dq=1.5(puntillo negra), h=2(blanca)
+──────────────────────────────────────────────────────── */
+const _Q=0.517; // negra (quarter) en segundos @116 BPM
+
+/* Frecuencias en Fa mayor */
+const Hz={
+  F2:87.3,C3:130.8,F3:174.6,G3:196.0,A3:220.0,Bb3:233.1,C4:261.6,D4:293.7,
+  E4:329.6,F4:349.2,G4:392.0,A4:440.0,Bb4:466.2,C5:523.3,D5:587.3,
+  E5:659.3,F5:698.5,G5:784.0
 };
-const E=0.25; // eighth-note duration at 120 BPM
 
-/* ── Original underwater calypso melody ─────────────── */
-/* Format: [freq, startBeat(8ths), durationBeats(8ths)] */
-const MEL=[
-  /* Phrase 1 — main theme */
-  [HZ.F4, 0,1],[HZ.A4, 1,1],[HZ.C5, 2,2],[HZ.A4, 4,1],[HZ.G4, 5,1],[HZ.F4, 6,2],
-  [HZ.D5, 9,1],[HZ.C5,10,1],[HZ.Bb4,11,1],[HZ.A4,12,4],
-  /* Phrase 2 — rising answer */
-  [HZ.C5,16,1],[HZ.D5,17,1],[HZ.E5,18,2],[HZ.D5,20,1],[HZ.C5,21,1],[HZ.Bb4,22,2],
-  [HZ.A4,24,1],[HZ.G4,25,1],[HZ.A4,26,2],[HZ.C5,28,4],
-  /* Phrase 3 — main theme decorated */
-  [HZ.F4,32,1],[HZ.A4,33,1],[HZ.C5,34,2],[HZ.D5,36,1],[HZ.E5,37,1],[HZ.F5,38,2],
-  [HZ.E5,40,1],[HZ.D5,41,1],[HZ.C5,42,1],[HZ.Bb4,43,1],[HZ.A4,44,4],
-  /* Phrase 4 — resolution */
-  [HZ.G4,48,1],[HZ.A4,49,1],[HZ.Bb4,50,2],[HZ.C5,52,1],[HZ.D5,53,1],
-  [HZ.C5,54,1],[HZ.Bb4,55,1],[HZ.A4,56,1],[HZ.G4,57,1],
-  [HZ.F4,58,1],[HZ.G4,59,1],[HZ.F4,60,4]
+/*
+  CORO "Bajo del mar":
+  "Ba-jo del mar"   = F4(dq) A4(e) | C5(q) A4(q) | G4(q) F4(h)
+  "Ba-jo del mar"   = F4(dq) A4(e) | C5(q) D5(q) | C5(q) Bb4(h)
+  "Dar-ling it's b" = C5(dq) E5(e) | G5(q) E5(q) | D5(q) C5(h)
+  "Down where it's" = A4(dq) C5(e) | D5(q) C5(q) | Bb4(q) A4(h)
+  "Take it from me" = Bb4(q) G4(q) | F4(dh+)
+*/
+const _MEL=[
+  /* "Ba-jo del mar" ×1 — compases 1-2 */
+  [Hz.F4,  0  ,1.5],[Hz.A4,  1.5,0.5],[Hz.C5,  2  ,1],[Hz.A4, 3  ,1],
+  [Hz.G4,  4  ,1  ],[Hz.F4,  5  ,2  ],
+  /* "Ba-jo del mar" ×2 — compases 3-4 */
+  [Hz.F4,  8  ,1.5],[Hz.A4,  9.5,0.5],[Hz.C5,  10 ,1],[Hz.D5, 11 ,1],
+  [Hz.C5,  12 ,1  ],[Hz.Bb4, 13 ,2  ],
+  /* "Darling it's better" — compases 5-6 */
+  [Hz.C5,  16 ,1.5],[Hz.E5,  17.5,0.5],[Hz.G5, 18 ,1],[Hz.E5, 19 ,1],
+  [Hz.D5,  20 ,1  ],[Hz.C5,  21 ,2  ],
+  /* "Down where it's wetter" — compases 7-8 */
+  [Hz.A4,  24 ,1.5],[Hz.C5,  25.5,0.5],[Hz.D5, 26 ,1],[Hz.C5, 27 ,1],
+  [Hz.Bb4, 28 ,1  ],[Hz.A4,  29 ,2  ],
+  /* "Take it from me" — compás 9 */
+  [Hz.Bb4, 32 ,1  ],[Hz.G4,  33 ,1  ],[Hz.F4,  34 ,3.5],
+  /* Pequeño interludio calipso — compases 10-12 */
+  [Hz.F4,  38 ,0.5],[Hz.G4,  38.5,0.5],[Hz.A4, 39 ,1],[Hz.C5, 40 ,1.5],
+  [Hz.A4,  41.5,0.5],[Hz.G4, 42 ,2  ],
+  [Hz.F4,  44 ,0.5],[Hz.A4,  44.5,0.5],[Hz.C5, 45 ,1],[Hz.D5, 46 ,1.5],
+  [Hz.C5,  47.5,0.5],[Hz.Bb4,48 ,2  ],
+  /* Remate — compases 13-14 */
+  [Hz.C5,  50 ,1  ],[Hz.D5,  51 ,1  ],[Hz.E5, 52 ,1],[Hz.F5, 53 ,2  ],
+  [Hz.E5,  55 ,1  ],[Hz.D5,  56 ,1  ],[Hz.C5, 57 ,1],[Hz.A4, 58 ,1  ],
+  [Hz.Bb4, 59 ,1  ],[Hz.G4,  60 ,1  ],[Hz.F4, 61 ,3 ]
 ];
-const BASS=[
-  /* Root–fifth calypso bass pattern every 4 beats (16 eighth notes) */
-  [HZ.F3, 0,3],[HZ.C4, 4,3],[HZ.F3, 8,3],[HZ.C4,12,3],
-  [HZ.F3,16,3],[HZ.C4,20,3],[HZ.A3,24,3],[HZ.C4,28,3],
-  [HZ.F3,32,3],[HZ.C4,36,3],[HZ.F3,40,3],[HZ.Bb3,44,3],
-  [HZ.C4,48,3],[HZ.Bb3,52,3],[HZ.F3,56,3],[HZ.C4,60,3]
-];
-/* Shimmer chords — one hit per 4 eighth-note beat */
-const CHORDS=[
-  [HZ.A4,0],[HZ.C5,4],[HZ.A4,8],[HZ.C5,12],
-  [HZ.A4,16],[HZ.C5,20],[HZ.A4,24],[HZ.C5,28],
-  [HZ.A4,32],[HZ.C5,36],[HZ.G5,40],[HZ.A5,44],
-  [HZ.G5,48],[HZ.A5,52],[HZ.F5,56],[HZ.C5,60]
-];
-const LOOP_BEATS=64; // total eighth-note beats before loop
-const LOOP_SEC=LOOP_BEATS*E;  // seconds per loop
 
-function scheduleLoop(startAt){
-  MEL.forEach(([f,b,d])=>playMarimba(f, startAt+b*E, d*E*.92, .17));
-  BASS.forEach(([f,b,d])=>playBass(f, startAt+b*E, d*E*.88, .13));
-  CHORDS.forEach(([f,b])=>playShimmer(f, startAt+b*E, E*2, .055));
+/* BAJO: raíz en tiempo 1, quinta en tiempo 3 de cada compás (2/2 feel calipso) */
+const _BASS=(()=>{
+  const b=[];
+  /* Progresión: F  F  F  F | F  F  C  C | Bb F  C  F | C  Bb F  C */
+  const roots=[Hz.F3,Hz.F3,Hz.F3,Hz.F3, Hz.F3,Hz.F3,Hz.C3,Hz.C3,
+               Hz.Bb3,Hz.F3,Hz.C3,Hz.F3, Hz.C3,Hz.Bb3,Hz.F3,Hz.C3];
+  const fifths=[Hz.C4,Hz.C4,Hz.C4,Hz.C4, Hz.C4,Hz.C4,Hz.G3,Hz.G3,
+                Hz.F3,Hz.C4,Hz.G3,Hz.C4, Hz.G3,Hz.F3,Hz.C4,Hz.G3];
+  for(let m=0;m<16;m++){b.push([roots[m],m*4,1.6]);b.push([fifths[m],m*4+2,1.6]);}
+  return b;
+})();
+
+/* SHIMMER STEEL — golpe en cada tiempo fuerte + contratiempo calipso */
+const _STEEL=(()=>{
+  const s=[];
+  for(let m=0;m<16;m++){
+    s.push([Hz.C5,m*4,0.4]);     // tiempo 1
+    s.push([Hz.A4,m*4+1.5,0.3]); // contratiempo
+    s.push([Hz.C5,m*4+2,0.4]);   // tiempo 3
+    s.push([Hz.A4,m*4+3.5,0.3]); // contratiempo
+  }
+  return s;
+})();
+
+const _LOOP_Q=64;              // negras totales del loop
+const _LOOP_S=_LOOP_Q*_Q;     // segundos totales
+
+/* ── Scheduler con look-ahead (sin stacking, sin cortes) ── */
+const _AHEAD=2.2; // programar 2.2 s por delante
+const _TICK =1.0; // chequear cada 1 s
+
+function _schedBlock(loopStart,gen){
+  /* Programa todas las notas del siguiente bloque */
+  if(!_ac||!musicPlaying||gen!==_gen) return;
+  _MEL.forEach(([f,b,d])  =>_marimba(f, loopStart+b*_Q, d*_Q*.92, .165));
+  _BASS.forEach(([f,b,d]) =>_bass(   f, loopStart+b*_Q, d*_Q*.85, .14 ));
+  _STEEL.forEach(([f,b,d])=>_steel(  f, loopStart+b*_Q, d*_Q,     .05 ));
+}
+
+let _loopStart=0, _lastScheduled=-1;
+function _tick(gen){
+  if(!musicPlaying||gen!==_gen){clearTimeout(_schedTimer);return;}
+  const now=_ac.currentTime;
+  const horizon=now+_AHEAD;
+  /* ¿El próximo loop entra dentro del horizonte? */
+  while(_lastScheduled<horizon){
+    _loopStart=(_lastScheduled<0)?now:_lastScheduled;
+    _schedBlock(_loopStart,gen);
+    _lastScheduled=_loopStart+_LOOP_S;
+  }
+  _schedTimer=setTimeout(()=>_tick(gen),_TICK*1000);
 }
 
 function startMusic(){
-  const c=getCtx(); c.resume();
-  musicStartTime=c.currentTime+.05;
-  scheduleLoop(musicStartTime); // first loop
-  /* Pre-schedule subsequent loops so there's never a gap */
-  musicLoopId=setInterval(()=>{
-    if(!musicPlaying){clearInterval(musicLoopId);return;}
-    const c2=getCtx();
-    const elapsed=c2.currentTime-musicStartTime;
-    const nextLoopStart=musicStartTime+Math.ceil(elapsed/LOOP_SEC)*LOOP_SEC;
-    scheduleLoop(nextLoopStart);
-  },LOOP_SEC*1000-200); // reschedule 200ms before next loop
+  _ensureCtx();
+  _gen++;
+  _lastScheduled=-1;
+  /* Fade in rápido */
+  _mg.gain.cancelScheduledValues(_ac.currentTime);
+  _mg.gain.setValueAtTime(0,_ac.currentTime);
+  _mg.gain.linearRampToValueAtTime(0.92,_ac.currentTime+.35);
+  _tick(_gen);
 }
-function stopMusic(){clearInterval(musicLoopId);}
+function stopMusic(){
+  _gen++;                        // invalida todos los callbacks pendientes
+  clearTimeout(_schedTimer);
+  if(_ac&&_mg){
+    /* Fade out rápido antes de silenciar */
+    _mg.gain.cancelScheduledValues(_ac.currentTime);
+    _mg.gain.setValueAtTime(_mg.gain.value,_ac.currentTime);
+    _mg.gain.linearRampToValueAtTime(0,_ac.currentTime+.4);
+  }
+}
 
 function toggleMusic(){
+  /* Evitar doble clic simultáneo */
+  musicBtn.disabled=true;
+  setTimeout(()=>musicBtn.disabled=false,500);
   if(musicPlaying){
     stopMusic();
     musicBtn.classList.remove('playing');
@@ -971,14 +1037,19 @@ function toggleMusic(){
 }
 musicBtn.addEventListener('click',toggleMusic);
 
-/* ── UI sound effects ───────────────────────────────── */
+/* ── Efectos de UI ───────────────────────────────────── */
+function _getCtxFx(){
+  _ensureCtx();
+  if(_mg.gain.value<0.01){_mg.gain.setValueAtTime(.6,_ac.currentTime);}
+  return _ac;
+}
 function playReveal(){
-  const c=getCtx();const t=c.currentTime;
-  [HZ.C4,HZ.E4,HZ.G4,HZ.C5].forEach((f,i)=>playMarimba(f,t+i*.12,.5,.1));
+  _getCtxFx();const t=_ac.currentTime;
+  [Hz.C4,Hz.E4,Hz.G4,Hz.C5].forEach((f,i)=>_marimba(f,t+i*.12,.5,.1));
 }
 function playSparkle(){
-  const c=getCtx();const t=c.currentTime;
-  [800,1000,1200,1600].forEach((f,i)=>playShimmer(f,t+i*.07,.22,.07));
+  _getCtxFx();const t=_ac.currentTime;
+  [800,1000,1200,1600].forEach((f,i)=>_steel(f,t+i*.07,.25,.08));
 }
 
 /* ── BIOLUMINESCENCE ────────────────────────────────── */
