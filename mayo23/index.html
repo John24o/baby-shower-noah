@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Baby Shower · Noah Nicolás</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@500;700&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;-webkit-tap-highlight-color:transparent}
+body{font-family:'Montserrat',sans-serif;color:#fff;overflow:hidden;background:#077890}
+
+:root{
+  --teal:#38C5D0;--teal2:#5DD8E0;--aqua:#B2EEF4;
+  --gold:#F5C842;--coral:#FF7B6E;--vh:100vh;
+}
+
+/* ══════════════════════════════════════════════════════
+   ENVELOPE SCREEN — pantalla de bienvenida independiente
+══════════════════════════════════════════════════════ */
+#env-screen{
+  position:fixed;inset:0;z-index:500;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  background:
+    radial-gradient(ellipse at 50% 0%,  #0A2540 0%, transparent 70%),
+    radial-gradient(ellipse at 50% 100%,#030E1C 0%, transparent 60%),
+    linear-gradient(180deg,#041020 0%,#020C18 50%,#030F1E 100%);
+  transition:opacity .9s ease, transform .9s ease;
+  gap:0;
+}
+#env-screen.fade-out{
+  opacity:0;
+  pointer-events:none;
+}
+
+/* Stars canvas on envelope screen */
+#star-canvas{position:absolute;inset:0;pointer-events:none}
+
+/* Label above */
+.env-label-top{
+  font-family:'Cormorant Garamond',serif;
+  font-style:italic;font-size:1.1rem;font-weight:300;
+  color:var(--gold);letter-spacing:.12rem;opacity:.85;
+  margin-bottom:32px;position:relative;z-index:2;
+  text-align:center;
+}
+.env-label-top::before,.env-label-top::after{content:'✦';margin:0 8px;font-style:normal;font-size:.75rem}
+
+/* Envelope wrapper */
+#env-wrap{
+  position:relative;width:280px;height:196px;
+  cursor:pointer;perspective:900px;
+  z-index:2;
+}
+@keyframes env-float{
+  0%,100%{transform:translateY(0px)}
+  50%    {transform:translateY(-10px)}
+}
+#env-wrap{animation:env-float 3s ease-in-out infinite}
+#env-wrap.opening{animation:none}
+
+#env-body{
+  width:280px;height:196px;
+  background:linear-gradient(145deg,#0D3D6E,#0A2E55);
+  border:1.5px solid rgba(100,170,230,.35);
+  border-radius:6px;
+  box-shadow:
+    0 24px 60px rgba(0,0,0,.6),
+    0 0 40px rgba(30,100,200,.15),
+    inset 0 1px 0 rgba(255,255,255,.12);
+  position:relative;overflow:hidden;
+}
+/* Envelope triangles */
+#env-flap{
+  position:absolute;top:0;left:0;right:0;
+  width:0;height:0;
+  border-left:140px solid transparent;
+  border-right:140px solid transparent;
+  border-top:100px solid #0D4880;
+  filter:drop-shadow(0 4px 8px rgba(0,0,0,.4));
+  transform-origin:top center;
+  transition:transform .8s cubic-bezier(.4,0,.2,1);
+  z-index:3;
+}
+#env-flap.open{transform:rotateX(180deg)}
+
+#env-left-tri{
+  position:absolute;bottom:0;left:0;width:0;height:0;
+  border-bottom:98px solid #0A3565;
+  border-right:140px solid transparent;z-index:1;
+}
+#env-right-tri{
+  position:absolute;bottom:0;right:0;width:0;height:0;
+  border-bottom:98px solid #0C3A6B;
+  border-left:140px solid transparent;z-index:1;
+}
+
+/* Seal */
+#env-seal{
+  position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+  width:52px;height:52px;
+  background:radial-gradient(circle at 35% 35%,#FFE066,#D4A000);
+  border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:24px;
+  box-shadow:0 4px 20px rgba(212,160,0,.5),0 0 0 3px rgba(212,160,0,.25);
+  z-index:4;transition:opacity .5s ease,transform .5s ease;
+}
+@keyframes seal-pulse{
+  0%,100%{box-shadow:0 4px 20px rgba(212,160,0,.5),0 0 0 0 rgba(212,160,0,.4)}
+  50%    {box-shadow:0 4px 20px rgba(212,160,0,.5),0 0 0 14px rgba(212,160,0,0)}
+}
+#env-seal{animation:seal-pulse 2s ease-in-out infinite}
+#env-seal.opened{animation:none;opacity:0;transform:translate(-50%,-50%) scale(.7)}
+
+/* Letter inside */
+#env-letter{
+  position:absolute;bottom:0;left:50%;transform:translateX(-50%);
+  width:78%;background:rgba(255,255,255,.08);
+  border-radius:4px 4px 0 0;height:75%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;
+  transition:height .7s ease .35s,opacity .7s ease .35s;z-index:2;overflow:hidden;
+}
+#env-letter.risen{height:115%}
+.env-letter-icon{font-size:26px;opacity:.7}
+.env-letter-text{font-family:'Dancing Script',cursive;font-size:.95rem;color:rgba(255,255,255,.5);letter-spacing:.1rem}
+
+/* Label below */
+.env-label-bottom{
+  font-size:.68rem;letter-spacing:.28rem;text-transform:uppercase;
+  color:rgba(255,255,255,.55);margin-top:30px;
+  position:relative;z-index:2;text-align:center;
+}
+.env-label-bottom span{color:var(--gold);margin:0 6px}
+
+/* Scroll hint on env screen */
+.env-scroll-hint{
+  position:absolute;bottom:28px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  opacity:0;transition:opacity .8s ease;pointer-events:none;z-index:2;
+}
+.env-scroll-hint.visible{opacity:.55}
+.env-scroll-hint p{font-size:.6rem;letter-spacing:.2rem;text-transform:uppercase}
+.scroll-mouse{
+  width:22px;height:36px;border:1.5px solid rgba(255,255,255,.5);
+  border-radius:11px;display:flex;align-items:flex-start;justify-content:center;padding-top:5px;
+}
+@keyframes scroll-dot{0%,100%{transform:translateY(0);opacity:.8}80%{transform:translateY(10px);opacity:0}}
+.scroll-dot{width:3px;height:7px;background:rgba(255,255,255,.7);border-radius:2px;animation:scroll-dot 1.6s ease-in-out infinite}
+
+/* ══════════════════════════════════════════════════════
+   OCEAN MAIN CONTENT
+══════════════════════════════════════════════════════ */
+#ocean{
+  height:100vh;height:calc(var(--vh,1vh)*100);
+  overflow-y:scroll;scroll-snap-type:y mandatory;scroll-behavior:smooth;
+  background:
+    radial-gradient(ellipse at 20% 0%,  #3DE0F0 0%,transparent 55%),
+    radial-gradient(ellipse at 80% 0%,  #22C9E0 0%,transparent 55%),
+    radial-gradient(ellipse at 50% 100%,#086478 0%,transparent 60%),
+    linear-gradient(180deg,#18C8DC 0%,#0DB4CC 30%,#099ABB 60%,#077890 100%);
+  opacity:0;transition:opacity 1s ease;
+}
+#ocean.visible{opacity:1}
+
+.section{
+  min-height:100vh;min-height:calc(var(--vh,1vh)*100);
+  scroll-snap-align:start;scroll-snap-stop:always;
+  position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden;
+}
+
+/* ── ANIMATION SYSTEM ────────────────────────────── */
+.a{opacity:0;transition:opacity .85s ease,transform .85s ease}
+.a.fu{transform:translateY(35px)}.a.fd{transform:translateY(-35px)}
+.a.fl{transform:translateX(-60px)}.a.fr{transform:translateX(60px)}
+.a.sc{transform:scale(.82)}
+.a.pop{transform:scale(.5);transition:opacity .6s cubic-bezier(.34,1.56,.64,1),transform .6s cubic-bezier(.34,1.56,.64,1)}
+.in-view .a{opacity:1;transform:none}
+.d1{transition-delay:.1s}.d2{transition-delay:.22s}.d3{transition-delay:.34s}
+.d4{transition-delay:.46s}.d5{transition-delay:.58s}.d6{transition-delay:.7s}
+.d7{transition-delay:.82s}.d8{transition-delay:.94s}
+.g-line{height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.7),transparent);width:0;transition:width 1s ease}
+.in-view .g-line{width:100%}
+.h-name-left{opacity:0;transform:translateX(-65px);transition:opacity .9s ease,transform .9s ease;transition-delay:.15s}
+.h-name-right{opacity:0;transform:translateX(65px);transition:opacity .9s ease,transform .9s ease;transition-delay:.35s}
+.in-view .h-name-left,.in-view .h-name-right{opacity:1;transform:none}
+
+/* ── CARDS ───────────────────────────────────────── */
+.card{
+  background:rgba(2,60,85,.45);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
+  border:1px solid rgba(255,255,255,.25);border-radius:24px;
+  padding:34px 28px;box-shadow:0 8px 48px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.15);
+  max-width:440px;width:90%;text-align:center;position:relative;z-index:10;
+}
+
+/* ── GOD RAYS ────────────────────────────────────── */
+#rays{position:fixed;inset:0;pointer-events:none;z-index:1;overflow:hidden}
+.ray{
+  position:absolute;top:-10%;left:50%;width:80px;height:140%;transform-origin:top center;
+  background:linear-gradient(180deg,rgba(255,255,255,.09) 0%,rgba(255,255,255,.02) 60%,transparent 100%);
+  animation:ray-sway 8s ease-in-out infinite;
+}
+.ray:nth-child(1){transform:rotate(-30deg) translateX(-300px);width:70px;animation-delay:0s}
+.ray:nth-child(2){transform:rotate(-15deg) translateX(-160px);width:55px;animation-delay:1.5s}
+.ray:nth-child(3){transform:rotate(0deg);width:100px;animation-delay:3s}
+.ray:nth-child(4){transform:rotate(15deg) translateX(160px);width:55px;animation-delay:1s}
+.ray:nth-child(5){transform:rotate(30deg) translateX(300px);width:70px;animation-delay:2.5s}
+.ray:nth-child(6){transform:rotate(-22deg) translateX(-220px);width:45px;animation-delay:4s}
+.ray:nth-child(7){transform:rotate(22deg) translateX(220px);width:50px;animation-delay:2s}
+@keyframes ray-sway{0%,100%{opacity:.5}50%{opacity:1}}
+
+/* ── SWIM LAYER ──────────────────────────────────── */
+#swimmers{position:fixed;inset:0;pointer-events:none;z-index:2;overflow:hidden}
+.swimmer{position:absolute}
+
+/* LTR: fish head faces RIGHT — natural left→right swim */
+@keyframes swim-ltr{
+  0%  {transform:translateX(-260px) translateY(0px);opacity:0}
+  14% {transform:translateX(8vw)  translateY(-4px);opacity:1}
+  28% {transform:translateX(22vw) translateY(-14px);opacity:1}
+  42% {transform:translateX(38vw) translateY(-2px);opacity:1}
+  56% {transform:translateX(54vw) translateY(-16px);opacity:1}
+  70% {transform:translateX(70vw) translateY(-1px);opacity:1}
+  84% {transform:translateX(86vw) translateY(-12px);opacity:1}
+  92% {opacity:1}
+  100%{transform:translateX(calc(100vw + 260px)) translateY(-6px);opacity:0}
+}
+/* RTL: fish head faces LEFT — natural right→left swim */
+@keyframes swim-rtl{
+  0%  {transform:translateX(calc(100vw + 260px)) translateY(0px);opacity:0}
+  14% {transform:translateX(calc(92vw))  translateY(-4px);opacity:1}
+  28% {transform:translateX(calc(78vw))  translateY(-14px);opacity:1}
+  42% {transform:translateX(calc(62vw))  translateY(-2px);opacity:1}
+  56% {transform:translateX(calc(46vw))  translateY(-16px);opacity:1}
+  70% {transform:translateX(calc(30vw))  translateY(-1px);opacity:1}
+  84% {transform:translateX(calc(14vw))  translateY(-12px);opacity:1}
+  92% {opacity:1}
+  100%{transform:translateX(-260px) translateY(-6px);opacity:0}
+}
+/* Whale LTR */
+@keyframes whale-swim{
+  0%  {transform:translateX(-700px) translateY(0);opacity:0}
+  8%  {opacity:.75}
+  40% {transform:translateX(38vw) translateY(10px);opacity:.75}
+  65% {transform:translateX(65vw) translateY(-20px);opacity:.75}
+  92% {opacity:.75}
+  100%{transform:translateX(calc(100vw + 700px)) translateY(-10px);opacity:0}
+}
+/* Turtle RTL */
+@keyframes turtle-swim{
+  0%  {transform:translateX(calc(100vw + 380px)) translateY(0);opacity:0}
+  8%  {opacity:.82}
+  48% {transform:translateX(46vw) translateY(-8px);opacity:.82}
+  92% {opacity:.82}
+  100%{transform:translateX(-380px) translateY(-4px);opacity:0}
+}
+/* Nemo LTR — sinusoidal gentle wave */
+@keyframes nemo-swim{
+  0%  {transform:translateX(-240px) translateY(0px);opacity:0}
+  12% {transform:translateX(6vw)  translateY(-4px);opacity:1}
+  24% {transform:translateX(20vw) translateY(-18px);opacity:1}
+  36% {transform:translateX(36vw) translateY(-2px);opacity:1}
+  50% {transform:translateX(52vw) translateY(-20px);opacity:1}
+  64% {transform:translateX(66vw) translateY(-2px);opacity:1}
+  78% {transform:translateX(80vw) translateY(-16px);opacity:1}
+  90% {transform:translateX(92vw) translateY(-4px);opacity:1}
+  95% {opacity:1}
+  100%{transform:translateX(calc(100vw + 240px)) translateY(-8px);opacity:0}
+}
+/* Dory RTL */
+@keyframes dory-swim{
+  0%  {transform:translateX(calc(100vw + 240px)) translateY(0px);opacity:0}
+  12% {transform:translateX(94vw) translateY(-4px);opacity:1}
+  24% {transform:translateX(80vw) translateY(-18px);opacity:1}
+  36% {transform:translateX(64vw) translateY(-2px);opacity:1}
+  50% {transform:translateX(48vw) translateY(-20px);opacity:1}
+  64% {transform:translateX(34vw) translateY(-2px);opacity:1}
+  78% {transform:translateX(20vw) translateY(-16px);opacity:1}
+  90% {transform:translateX(6vw)  translateY(-4px);opacity:1}
+  95% {opacity:1}
+  100%{transform:translateX(-240px) translateY(-8px);opacity:0}
+}
+/* Starfish slow drift */
+@keyframes starfish-drift{
+  0%  {transform:translateX(-100px) translateY(0) rotate(0deg);opacity:0}
+  10% {opacity:.55}
+  90% {opacity:.55}
+  100%{transform:translateX(calc(100vw + 100px)) translateY(30px) rotate(200deg);opacity:0}
+}
+/* Fade-in for static floaters (jellyfish, seahorses) */
+@keyframes floater-in{
+  0%   {opacity:0;transform:scale(.88) translateY(10px)}
+  100% {opacity:1;transform:scale(1)   translateY(0px)}
+}
+/* Jellyfish gentle bob — loops forever */
+@keyframes jelly-bob{
+  0%  {transform:translateY(0px) scale(1)}
+  30% {transform:translateY(-20px) scale(1.04)}
+  60% {transform:translateY(-7px) scale(.97)}
+  100%{transform:translateY(0px) scale(1)}
+}
+/* Seahorse graceful float */
+@keyframes seahorse-float{
+  0%  {transform:translateY(0px) rotate(-4deg)}
+  25% {transform:translateY(-10px) rotate(-1deg)}
+  50% {transform:translateY(-17px) rotate(5deg)}
+  75% {transform:translateY(-8px) rotate(2deg)}
+  100%{transform:translateY(0px) rotate(-4deg)}
+}
+@keyframes bubble-rise{0%{transform:translateY(0) translateX(0);opacity:.7}40%{transform:translateY(-38px) translateX(4px);opacity:.5}100%{transform:translateY(-85px) translateX(-3px);opacity:0}}
+
+/* ── CAUSTIC ─────────────────────────────────────── */
+#caustic{
+  position:fixed;inset:0;pointer-events:none;z-index:1;animation:caustic-pulse 14s ease-in-out infinite alternate;
+  background:radial-gradient(ellipse 140px 80px at 20% 15%,rgba(255,255,255,.06) 0%,transparent 70%),radial-gradient(ellipse 200px 100px at 70% 30%,rgba(255,255,255,.04) 0%,transparent 70%),radial-gradient(ellipse 120px 70px at 40% 65%,rgba(255,255,255,.05) 0%,transparent 70%)
+}
+@keyframes caustic-pulse{from{opacity:.7}to{opacity:1}}
+
+.bubble{position:absolute;border-radius:50%;background:radial-gradient(circle at 35% 35%,rgba(255,255,255,.55),rgba(255,255,255,.08) 60%,transparent);border:1px solid rgba(255,255,255,.25);pointer-events:none}
+
+/* ── NAV DOTS ────────────────────────────────────── */
+#nav-dots{position:fixed;right:18px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:10px;z-index:100;opacity:0;transition:opacity .6s ease}
+#nav-dots.visible{opacity:1}
+.dot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.4);border:1.5px solid rgba(255,255,255,.7);cursor:pointer;transition:all .3s}
+.dot.active{background:#fff;transform:scale(1.4)}
+
+/* ── MUSIC BTN ───────────────────────────────────── */
+#music-btn{
+  position:fixed;top:16px;right:16px;z-index:600;width:42px;height:42px;border-radius:50%;
+  background:rgba(3,70,100,.6);backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.35);
+  color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .3s;box-shadow:0 4px 20px rgba(0,0,0,.3);
+}
+#music-btn:hover{background:rgba(3,90,130,.8);transform:scale(1.1)}
+@keyframes spin{to{transform:rotate(360deg)}}
+#music-btn.playing::before{content:'';position:absolute;inset:-4px;border-radius:50%;border:2px solid transparent;border-top-color:var(--teal2);animation:spin 2s linear infinite}
+
+/* ── CONFETTI ────────────────────────────────────── */
+#confetti-canvas{position:fixed;inset:0;pointer-events:none;z-index:999}
+
+/* ── TYPOGRAPHY ──────────────────────────────────── */
+.t-section-label{font-size:.65rem;letter-spacing:.28rem;text-transform:uppercase;opacity:.7}
+.t-name{font-size:3.4rem;font-family:'Dancing Script',cursive;line-height:1.1;color:#fff;text-shadow:0 4px 24px rgba(0,0,0,.35)}
+.t-name-script{font-size:2.2rem;font-family:'Dancing Script',cursive;color:var(--aqua)}
+.t-hero-label{font-size:.7rem;letter-spacing:.3rem;text-transform:uppercase;opacity:.8;font-weight:300}
+.t-big-script{font-size:2.4rem;font-family:'Dancing Script',cursive}
+.t-date{font-size:3.2rem;font-family:'Dancing Script',cursive;color:#fff}
+.t-verse{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.15rem;line-height:1.8;font-weight:300}
+.t-xs{font-size:.72rem;letter-spacing:.05rem;opacity:.75}
+.t-sm{font-size:.85rem}
+.t-ref{font-size:.7rem;letter-spacing:.15rem;text-transform:uppercase;opacity:.65}
+.divider{display:flex;align-items:center;gap:10px;margin:10px 0}
+.divider span{font-size:14px;opacity:.7}
+.wave-top{display:none}
+.sea-floor{display:none}
+.reef-layer{position:fixed;bottom:0;left:0;right:0;height:220px;pointer-events:none;overflow:hidden;z-index:4}
+.reef-layer svg{position:absolute;bottom:0;left:0;width:100%;height:100%}
+
+/* ── COUNTDOWN ───────────────────────────────────── */
+#countdown-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.count-item{background:rgba(255,255,255,.1);border-radius:12px;padding:14px 6px;border:1px solid rgba(255,255,255,.15)}
+.count-num{font-size:2.2rem;font-family:'Dancing Script',cursive;line-height:1;color:#fff}
+.count-lbl{font-size:.58rem;letter-spacing:.12rem;text-transform:uppercase;opacity:.7;margin-top:4px}
+
+/* ── RSVP / BUTTONS ──────────────────────────────── */
+.rsvp-input{width:100%;background:rgba(255,255,255,.12);border:1.5px solid rgba(255,255,255,.3);border-radius:12px;padding:12px 16px;color:#fff;font-family:'Montserrat',sans-serif;font-size:.85rem;outline:none;transition:border-color .3s,background .3s}
+.rsvp-input::placeholder{color:rgba(255,255,255,.5)}
+.rsvp-input:focus{border-color:rgba(255,255,255,.7);background:rgba(255,255,255,.18)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:13px 28px;border-radius:50px;border:none;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:.82rem;font-weight:600;letter-spacing:.08rem;transition:all .3s;text-decoration:none}
+.btn-primary{background:linear-gradient(135deg,#3CE0F0,#0ABACF);color:#fff;box-shadow:0 6px 24px rgba(0,190,220,.45)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(0,190,220,.6)}
+.btn-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.5)}
+.btn-outline:hover{background:rgba(255,255,255,.12)}
+.btn-wa{background:linear-gradient(135deg,#25D366,#128C7E);color:#fff}
+.btn-wa:hover{transform:translateY(-2px)}
+.color-swatch{width:32px;height:32px;border-radius:8px;border:2px solid rgba(255,255,255,.35);display:inline-block}
+
+/* ── SCROLL HINT ─────────────────────────────────── */
+@keyframes bounce-down{0%,100%{transform:translateX(-50%) translateY(0)}50%{transform:translateX(-50%) translateY(8px)}}
+.scroll-hint{position:absolute;bottom:22px;left:50%;animation:bounce-down 1.6s ease-in-out infinite;opacity:.6;font-size:20px;z-index:10}
+
+/* ── RESPONSIVE ──────────────────────────────────── */
+@media(max-width:420px){
+  .t-name{font-size:2.6rem}.t-date{font-size:2.5rem}
+  .card{padding:24px 18px}.count-num{font-size:1.8rem}
+  #env-wrap{width:240px;height:168px}
+  #env-body{width:240px;height:168px}
+  #env-flap{border-left-width:120px;border-right-width:120px;border-top-width:86px}
+  #env-left-tri{border-bottom-width:84px;border-right-width:120px}
+  #env-right-tri{border-bottom-width:84px;border-left-width:120px}
+}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     PANTALLA SOBRE — página de bienvenida completa
+═════════════════════════════════════════════════ -->
+<div id="env-screen">
+  <canvas id="star-canvas"></canvas>
+
+  <p class="env-label-top">Un mensaje especial te espera</p>
+
+  <div id="env-wrap" onclick="openEnvelope()" title="Toca para abrir">
+    <div id="env-body">
+      <div id="env-flap"></div>
+      <div id="env-left-tri"></div>
+      <div id="env-right-tri"></div>
+      <div id="env-letter">
+        <span class="env-letter-icon">🐚</span>
+        <span class="env-letter-text">Noah Nicolás</span>
+      </div>
+    </div>
+    <div id="env-seal">🌊</div>
+  </div>
+
+  <p class="env-label-bottom"><span>★</span>Toca el sobre para abrir<span>★</span></p>
+
+  <div class="env-scroll-hint" id="env-scroll-hint">
+    <p>DESLIZA</p>
+    <div class="scroll-mouse"><div class="scroll-dot"></div></div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     CAPAS FIJAS DEL OCÉANO
+═════════════════════════════════════════════════ -->
+<div id="rays"><div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div><div class="ray"></div></div>
+<div id="caustic"></div>
+<div id="swimmers"></div>
+<canvas id="confetti-canvas"></canvas>
+<button id="music-btn" aria-label="Música">♪</button>
+<audio id="bg-music" loop preload="auto" src="music.mp3" style="display:none"></audio>
+<div id="nav-dots"></div>
+
+<!-- ════════════════════════════════════════════════
+     CONTENIDO PRINCIPAL — scroll snap sections
+═════════════════════════════════════════════════ -->
+<div id="ocean">
+
+<!-- S1 HERO -->
+<section class="section" id="s1" data-dot="0">
+  <div class="wave-top"></div>
+  <div class="card">
+    <p class="t-hero-label a fu d1">te invitamos a celebrar la llegada de</p>
+    <div class="divider a sc d2"><div class="g-line"></div><span>🐋</span><div class="g-line"></div></div>
+    <div style="line-height:1;margin:4px 0">
+      <div class="h-name-left"><span class="t-name">Noah</span></div>
+      <div class="h-name-right"><span class="t-name-script">Nicolás</span></div>
+    </div>
+    <div class="divider a sc d4" style="margin-top:8px"><div class="g-line"></div><span>🐠</span><div class="g-line"></div></div>
+    <p class="t-hero-label a fu d5" style="opacity:.75">baby shower</p>
+    <p class="a fu d6" style="margin-top:10px;font-size:1.05rem;font-family:'Dancing Script',cursive;color:var(--aqua)">Sábado · 25 de Abril, 2026</p>
+    <p class="t-xs a fu d7" style="margin-top:6px">5:00 PM — Acompáñanos</p>
+  </div>
+  <div class="scroll-hint">🐟</div>
+  <div class="sea-floor"></div>
+</section>
+
+<!-- S2 BIENVENIDA -->
+<section class="section" id="s2" data-dot="1">
+  <div class="wave-top"></div>
+  <div class="card">
+    <p class="t-section-label a fu d1">mensaje de bienvenida</p>
+    <div class="g-line a d2" style="margin:10px auto;max-width:200px"></div>
+    <p class="a sc d2" style="font-size:2rem;margin:14px 0">🌊</p>
+    <p class="a fu d3" style="font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.15rem;line-height:1.8">
+      "Cada pequeña ola que llega a la orilla<br/>trae consigo la promesa de algo nuevo…"
+    </p>
+    <div class="g-line a d4" style="margin:16px auto;max-width:200px"></div>
+    <p class="t-sm a fu d5" style="line-height:1.7;opacity:.9">Con el corazón lleno de alegría y agradecimiento,<br/>los invitamos a compartir este momento<br/>tan especial junto a nosotros.</p>
+    <p class="a fu d6" style="margin-top:18px;font-family:'Dancing Script',cursive;font-size:1.5rem;color:var(--aqua)">¡Los esperamos! 🐠</p>
+  </div>
+  <div class="scroll-hint">🐟</div>
+  <div class="sea-floor"></div>
+</section>
+
+<!-- S3 FECHA -->
+<section class="section" id="s3" data-dot="2">
+  <div class="wave-top"></div>
+  <div class="card">
+    <p class="t-section-label a fu d1">¿Cuándo?</p>
+    <div class="g-line a d2" style="margin:10px auto;max-width:180px"></div>
+    <p class="a pop d2" style="font-size:2.4rem;margin:12px 0">🗓️</p>
+    <p class="t-date a pop d3">23 de Mayo</p>
+    <p class="a fu d4" style="font-family:'Cormorant Garamond',serif;font-size:1.6rem;font-weight:300;margin-top:4px">2026</p>
+    <div class="g-line a d5" style="margin:14px auto;max-width:180px"></div>
+    <div class="a fu d5" style="display:flex;justify-content:center;gap:20px;margin:6px 0">
+      <div><p style="font-size:1.9rem;font-family:'Dancing Script',cursive">Domingo</p><p class="t-xs" style="margin-top:2px">el día especial</p></div>
+      <div style="width:1px;background:rgba(255,255,255,.3)"></div>
+      <div><p style="font-size:1.9rem;font-family:'Dancing Script',cursive">5:00 PM</p><p class="t-xs" style="margin-top:2px">hora de inicio</p></div>
+    </div>
+    <div class="g-line a d6" style="margin:14px auto;max-width:180px"></div>
+    <div class="a fu d7" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px">
+      <a id="btn-gcal" href="#" class="btn btn-outline" style="font-size:.75rem;padding:10px 18px">📅 Google Calendar</a>
+      <a id="btn-ics"  href="#" class="btn btn-outline" style="font-size:.75rem;padding:10px 18px">📁 Guardar fecha</a>
+    </div>
+  </div>
+  <div class="scroll-hint">🐟</div>
+  <div class="sea-floor"></div>
+</section>
+
+<!-- S4 LUGAR -->
+<section class="section" id="s4" data-dot="3">
+  <div class="wave-top"></div>
+  <div class="card">
+    <p class="t-section-label a fu d1">¿Dónde?</p>
+    <div class="g-line a d2" style="margin:10px auto;max-width:180px"></div>
+    <div class="a pop d3" style="font-size:3rem;margin:12px 0">📍</div>
+    <p class="t-big-script a pop d4" style="color:var(--aqua)">¡Ya tenemos lugar!</p>
+    <div class="g-line a d5" style="margin:14px auto;max-width:180px"></div>
+    <p class="t-sm a fu d5" style="line-height:1.7;opacity:.85">Te esperamos para celebrar juntos<br/>la llegada de Noah Nicolás. 🌊<br/>¡Será un día increíble!</p>
+    <div class="g-line a d6" style="margin:14px auto;max-width:180px"></div>
+    <a href="https://maps.app.goo.gl/dJgs5Z8tTKXVQcbF8" target="_blank" class="btn btn-primary a pop d7" style="margin-top:8px;display:inline-flex;align-items:center;gap:8px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+      Ver ubicación en Maps
+    </a>
+  </div>
+  <div class="scroll-hint">🐟</div>
+  <div class="sea-floor"></div>
+</section>
+
+<!-- S5 COUNTDOWN -->
+<section class="section" id="s5" data-dot="4">
+  <div class="wave-top"></div>
+  <div class="card">
+    <p class="t-section-label a fu d1">faltan…</p>
+    <div class="g-line a d2" style="margin:10px auto;max-width:180px"></div>
+    <p class="a sc d2" style="font-size:2.2rem;margin:12px 0">⏳</p>
+    <div id="countdown-grid" class="a sc d3">
+      <div class="count-item"><div class="count-num" id="cd-d">--</div><div class="count-lbl">días</div></div>
+      <div class="count-item"><div class="count-num" id="cd-h">--</div><div class="count-lbl">horas</div></div>
+      <div class="count-item"><div class="count-num" id="cd-m">--</div><div class="count-lbl">min</div></div>
+      <div class="count-item"><div class="count-num" id="cd-s">--</div><div class="count-lbl">seg</div></div>
+    </div>
+    <div class="g-line a d5" style="margin:18px auto;max-width:180px"></div>
+    <p class="a fu d6" style="font-family:'Dancing Script',cursive;font-size:1.4rem;color:var(--aqua);margin-top:4px">¡Cada segundo cuenta! 🐋</p>
+    <p class="t-xs a fu d7" style="margin-top:8px;opacity:.7">Hasta el 23 de Mayo de 2026, 5:00 PM</p>
+  </div>
+  <div class="scroll-hint">🐟</div>
+  <div class="sea-floor"></div>
+</section>
+
+<!-- S6 VERSÍCULO -->
+<section class="section" id="s6" data-dot="5">
+  <div class="wave-top"></div>
+  <div class="card">
+    <p class="t-section-label a fu d1">una promesa</p>
+    <div class="g-line a d2" style="margin:10px auto;max-width:180px"></div>
+    <p class="a sc d2" style="font-size:2.4rem;margin:14px 0">📖</p>
+    <p class="t-verse a fu d3">"He aquí, herencia del Señor son los hijos;<br/>cosa de estima el fruto del vientre."</p>
+    <div class="g-line a d5" style="margin:18px auto;max-width:180px"></div>
+    <p class="t-ref a fu d6" style="margin-top:4px">Salmo 127 : 3</p>
+    <p class="a fu d7" style="margin-top:18px;font-family:'Dancing Script',cursive;font-size:1.3rem;color:var(--aqua)">Noah Nicolás es un regalo de Dios 💙</p>
+  </div>
+  <div class="scroll-hint">🐟</div>
+  <div class="sea-floor"></div>
+</section>
+
+<!-- S7 DRESSCODE -->
+<section class="section" id="s7" data-dot="6">
+  <div class="wave-top"></div>
+  <div class="card">
+    <p class="t-section-label a fu d1">dresscode</p>
+    <div class="g-line a d2" style="margin:10px auto;max-width:180px"></div>
+    <p class="a sc d2" style="font-size:2.2rem;margin:12px 0">👗</p>
+    <p class="t-big-script a pop d3" style="color:var(--aqua)">Tonos del Mar</p>
+    <div class="g-line a d4" style="margin:14px auto;max-width:180px"></div>
+    <div class="a sc d5" style="display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin:10px 0">
+      <span class="color-swatch" style="background:#B2EEF4"></span>
+      <span class="color-swatch" style="background:#38C5D0"></span>
+      <span class="color-swatch" style="background:#1E90BE"></span>
+      <span class="color-swatch" style="background:#FFFFFF"></span>
+      <span class="color-swatch" style="background:#F0E8C8"></span>
+      <span class="color-swatch" style="background:#7ECFC8"></span>
+    </div>
+    <p class="t-sm a fu d6" style="line-height:1.7;opacity:.85;margin-top:10px">Vístete en tonos azul, turquesa, verde agua,<br/>blanco o arena. ¡Que todos brillemos<br/>como el mar en este día tan especial! 🌊</p>
+    <div class="g-line a d7" style="margin:14px auto;max-width:180px"></div>
+    <p class="a fu d8 t-xs" style="opacity:.65;font-style:italic">✨ Evitar colores oscuros o llamativos</p>
+  </div>
+  <div class="scroll-hint">🐟</div>
+  <div class="sea-floor"></div>
+</section>
+
+<!-- S8 MESA DE REGALOS -->
+<section class="section" id="s8" data-dot="7">
+  <div class="wave-top"></div>
+  <div class="card">
+    <p class="t-section-label a fu d1">mesa de regalos</p>
+    <div class="g-line a d2" style="margin:10px auto;max-width:180px"></div>
+    <p class="a sc d2" style="font-size:2.4rem;margin:14px 0">🎁</p>
+    <p class="t-big-script a pop d3" style="color:var(--aqua)">Liverpool</p>
+    <div class="g-line a d4" style="margin:14px auto;max-width:180px"></div>
+    <p class="t-sm a fu d5" style="line-height:1.7;opacity:.85">Si deseas hacernos un regalo,<br/>hemos preparado una lista con amor<br/>en Liverpool para que sea muy fácil. 💙</p>
+    <p class="t-xs a fu d6" style="margin-top:10px;opacity:.65;font-style:italic">¡Tu presencia es el mejor regalo,<br/>pero si quieres consentir a Noah Nicolás…</p>
+    <div class="g-line a d6" style="margin:14px auto;max-width:180px"></div>
+    <a href="https://mesaderegalos.liverpool.com.mx/milistaderegalos/51982046" target="_blank" class="btn btn-primary a pop d7" style="margin-top:6px;display:inline-flex;align-items:center;gap:8px">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M20 6h-2.18c.07-.44.18-.86.18-1.3C18 2.12 15.88 0 13.3 0c-1.3 0-2.4.52-3.3 1.38C9.1.52 8 0 6.7 0 4.12 0 2 2.12 2 4.7c0 .44.11.86.18 1.3H0v2h1l1 13h20l1-13h1V6h-4zm-6.7-4c1.02 0 1.7.7 1.7 1.7 0 1.44-1.44 2.84-4 4.66C8.44 6.54 7 5.14 7 3.7 7 2.7 7.68 2 8.7 2c.6 0 1.06.22 1.44.62L12 4.48l1.86-1.86c.38-.4.84-.62 1.44-.62zM4 19l-.75-11h17.5L20 19H4z"/></svg>
+      Ver mesa de regalos
+    </a>
+  </div>
+  <div class="scroll-hint">🐟</div>
+  <div class="sea-floor"></div>
+</section>
+
+<!-- S9 RSVP -->
+<section class="section" id="s9" data-dot="8">
+  <div class="wave-top"></div>
+  <div class="card">
+    <p class="t-section-label a fu d1">confirmar asistencia</p>
+    <div class="g-line a d2" style="margin:10px auto;max-width:180px"></div>
+    <p class="a sc d2" style="font-size:2rem;margin:10px 0">🎉</p>
+    <p class="t-big-script a pop d3" style="color:var(--aqua)">¿Nos acompañas?</p>
+    <div class="g-line a d4" style="margin:12px auto;max-width:180px"></div>
+    <div id="rsvp-form" class="a fu d5" style="margin-top:10px">
+      <input id="rsvp-name" class="rsvp-input" type="text" placeholder="Tu nombre" style="margin-bottom:10px"/>
+      <input id="rsvp-guests" class="rsvp-input" type="number" min="1" max="10" placeholder="Número de invitados" style="margin-bottom:14px"/>
+      <button onclick="submitRSVP()" class="btn btn-wa" style="width:100%;padding:14px;font-size:.95rem">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        🎊 Confirmar por WhatsApp
+      </button>
+    </div>
+    <div id="rsvp-ok" style="display:none;margin-top:12px">
+      <p style="font-size:2rem">🥳</p>
+      <p style="font-family:'Dancing Script',cursive;font-size:1.6rem;color:var(--aqua);margin:8px 0">¡Gracias, <span id="rsvp-name-ok"></span>!</p>
+      <p class="t-sm" style="opacity:.85">Tu WhatsApp se abrirá en un momento 💙</p>
+    </div>
+    <div class="g-line a d7" style="margin:16px auto;max-width:180px"></div>
+    <p class="t-xs a fu d7" style="opacity:.7;margin-bottom:10px">¿Preguntas? Escríbenos directamente:</p>
+    <a href="https://wa.me/525530457991" target="_blank" class="btn btn-wa a pop d8">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="flex-shrink:0"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+      WhatsApp · 55 3045 7991
+    </a>
+  </div>
+  <div class="sea-floor"></div>
+</section>
+
+</div><!-- #ocean -->
+
+<script>
+/* ── VH FIX ─────────────────────────────────────────── */
+const setVH=()=>document.documentElement.style.setProperty('--vh',innerHeight*.01+'px');
+setVH();addEventListener('resize',setVH);
+
+/* ── STARS + SHOOTING STARS ON ENVELOPE SCREEN ──────── */
+(function initStars(){
+  const canvas=document.getElementById('star-canvas');
+  const ctx=canvas.getContext('2d');
+  function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
+  resize();addEventListener('resize',resize);
+
+  /* Static twinkling stars */
+  const stars=Array.from({length:130},()=>({
+    x:Math.random()*innerWidth,y:Math.random()*innerHeight,
+    r:.3+Math.random()*1.6,phase:Math.random()*Math.PI*2,speed:.3+Math.random()*.9
+  }));
+
+  /* Shooting stars pool */
+  const shooters=[];
+  function spawnShooter(){
+    if(document.getElementById('env-screen').style.display==='none') return;
+    /* Start from top-left quadrant, shoot diagonally down-right */
+    const angle=30+Math.random()*25; // degrees below horizontal
+    const rad=angle*Math.PI/180;
+    const len=140+Math.random()*120;
+    const spd=9+Math.random()*7;
+    const x0=Math.random()*innerWidth*.75;
+    const y0=Math.random()*innerHeight*.45;
+    shooters.push({x:x0,y:y0,len,spd,rad,alpha:1,tail:[]});
+    /* Schedule next star */
+    const delay=1400+Math.random()*2200;
+    setTimeout(spawnShooter,delay);
+  }
+  /* Kick off first shooter after a short delay */
+  setTimeout(spawnShooter,900);
+
+  (function drawStars(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    const t=Date.now()/1000;
+
+    /* Twinkling stars */
+    stars.forEach(s=>{
+      const a=(.5+.5*Math.sin(t*s.speed+s.phase))*.85+.1;
+      ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+      ctx.fillStyle=`rgba(255,255,255,${a})`;ctx.fill();
+    });
+
+    /* Shooting stars */
+    for(let i=shooters.length-1;i>=0;i--){
+      const sh=shooters[i];
+      sh.x+=Math.cos(sh.rad)*sh.spd;
+      sh.y+=Math.sin(sh.rad)*sh.spd;
+      sh.alpha-=0.018;
+      if(sh.alpha<=0||sh.x>innerWidth+50||sh.y>innerHeight+50){
+        shooters.splice(i,1);continue;
+      }
+      /* Draw glowing streak */
+      const tailX=sh.x-Math.cos(sh.rad)*sh.len;
+      const tailY=sh.y-Math.sin(sh.rad)*sh.len;
+      const grad=ctx.createLinearGradient(tailX,tailY,sh.x,sh.y);
+      grad.addColorStop(0,'rgba(255,255,255,0)');
+      grad.addColorStop(.6,`rgba(220,240,255,${sh.alpha*.45})`);
+      grad.addColorStop(1,`rgba(255,255,255,${sh.alpha})`);
+      ctx.beginPath();
+      ctx.moveTo(tailX,tailY);
+      ctx.lineTo(sh.x,sh.y);
+      ctx.strokeStyle=grad;
+      ctx.lineWidth=2.2;
+      ctx.lineCap='round';
+      ctx.stroke();
+      /* Bright head glow */
+      const hg=ctx.createRadialGradient(sh.x,sh.y,0,sh.x,sh.y,8);
+      hg.addColorStop(0,`rgba(255,255,255,${sh.alpha*.9})`);
+      hg.addColorStop(1,'rgba(255,255,255,0)');
+      ctx.beginPath();ctx.arc(sh.x,sh.y,8,0,Math.PI*2);
+      ctx.fillStyle=hg;ctx.fill();
+    }
+
+    requestAnimationFrame(drawStars);
+  })();
+})();
+
+/* ── NAV DOTS ───────────────────────────────────────── */
+const sections=document.querySelectorAll('.section');
+const navDots=document.getElementById('nav-dots');
+sections.forEach((_,i)=>{
+  const d=document.createElement('div');
+  d.className='dot'+(i===0?' active':'');
+  d.onclick=()=>sections[i].scrollIntoView({behavior:'smooth'});
+  navDots.appendChild(d);
+});
+const updateDots=idx=>document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===idx));
+
+/* ── INTERSECTION OBSERVER ──────────────────────────── */
+const io=new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      e.target.classList.add('in-view');
+      updateDots(Array.from(sections).indexOf(e.target));
+    }else e.target.classList.remove('in-view');
+  });
+},{threshold:.35});
+sections.forEach(s=>io.observe(s));
+
+/* ── OPEN ENVELOPE → TRANSITION ─────────────────────── */
+let envOpened=false;
+function openEnvelope(){
+  if(envOpened)return;
+  envOpened=true;
+
+  const wrap=document.getElementById('env-wrap');
+  wrap.classList.add('opening'); // stop float animation
+
+  // 1. Open the flap
+  document.getElementById('env-flap').classList.add('open');
+  const seal=document.getElementById('env-seal');
+  seal.classList.add('opened');
+  setTimeout(()=>document.getElementById('env-letter').classList.add('risen'),500);
+
+  // 2. Show "desliza" hint briefly
+  setTimeout(()=>document.getElementById('env-scroll-hint').classList.add('visible'),700);
+
+  // 3. Fade out envelope screen, fade in ocean
+  setTimeout(()=>{
+    const screen=document.getElementById('env-screen');
+    const ocean=document.getElementById('ocean');
+    screen.classList.add('fade-out');
+    ocean.classList.add('visible');
+    document.body.style.overflow='auto'; // re-enable scroll
+    setTimeout(()=>{
+      screen.style.display='none';
+      document.getElementById('nav-dots').classList.add('visible');
+      // Trigger S1 animations
+      sections[0].classList.add('in-view');
+    },950);
+  },1100);
+
+  playReveal();
+}
+
+/* ── COUNTDOWN ──────────────────────────────────────── */
+const target=new Date('2026-05-23T17:00:00-06:00');
+const updateCountdown=()=>{
+  const diff=target-Date.now();
+  if(diff<=0){['cd-d','cd-h','cd-m','cd-s'].forEach(id=>document.getElementById(id).textContent='00');return}
+  document.getElementById('cd-d').textContent=String(Math.floor(diff/864e5)).padStart(2,'0');
+  document.getElementById('cd-h').textContent=String(Math.floor((diff%864e5)/36e5)).padStart(2,'0');
+  document.getElementById('cd-m').textContent=String(Math.floor((diff%36e5)/6e4)).padStart(2,'0');
+  document.getElementById('cd-s').textContent=String(Math.floor((diff%6e4)/1e3)).padStart(2,'0');
+};
+updateCountdown();setInterval(updateCountdown,1000);
+
+/* ── CALENDAR ───────────────────────────────────────── */
+(()=>{
+  const p=new URLSearchParams({action:'TEMPLATE',dates:'20260523T170000/20260523T210000',text:'Baby Shower · Noah Nicolás',details:'¡Acompáñanos a celebrar la llegada de Noah Nicolás!',location:'Ver ubicación en Google Maps: https://maps.app.goo.gl/dJgs5Z8tTKXVQcbF8'});
+  document.getElementById('btn-gcal').href='https://calendar.google.com/calendar/render?'+p;
+  const ics=['BEGIN:VCALENDAR','VERSION:2.0','BEGIN:VEVENT','DTSTART;TZID=America/Mexico_City:20260523T170000','DTEND;TZID=America/Mexico_City:20260523T210000','SUMMARY:Baby Shower · Noah Nicolás','DESCRIPTION:¡Acompáñanos a celebrar la llegada de Noah Nicolás!','LOCATION:https://maps.app.goo.gl/dJgs5Z8tTKXVQcbF8','END:VEVENT','END:VCALENDAR'].join('\r\n');
+  const a=document.getElementById('btn-ics');
+  a.href=URL.createObjectURL(new Blob([ics],{type:'text/calendar'}));
+  a.download='baby-shower-noah.ics';
+})();
+
+/* ── RSVP ───────────────────────────────────────────── */
+function submitRSVP(){
+  const name=document.getElementById('rsvp-name').value.trim();
+  const guests=document.getElementById('rsvp-guests').value||'1';
+  if(!name){document.getElementById('rsvp-name').focus();return}
+  document.getElementById('rsvp-form').style.display='none';
+  document.getElementById('rsvp-name-ok').textContent=name;
+  document.getElementById('rsvp-ok').style.display='block';
+  launchConfetti();playSparkle();
+  const personas=parseInt(guests)===1?'1 persona':`${guests} personas`;
+  const msg=encodeURIComponent(
+    `¡Hola! Soy ${name} y confirmo mi asistencia al Baby Shower de Noah Nicolás el 23 de mayo 🎊 Asistiremos ${personas}. ¡Nos vemos pronto! 🐠💙`
+  );
+  setTimeout(()=>window.open(`https://wa.me/525530457991?text=${msg}`,'_blank'),800);
+}
+
+/* ── CONFETTI ───────────────────────────────────────── */
+let _confettiFrame=null;  // módulo-nivel: cancelar animación anterior correctamente
+function launchConfetti(){
+  const canvas=document.getElementById('confetti-canvas');
+  const ctx=canvas.getContext('2d');
+  canvas.width=innerWidth;canvas.height=innerHeight;
+  if(_confettiFrame){cancelAnimationFrame(_confettiFrame);_confettiFrame=null;}
+  const COLORS=['#38C5D0','#F5C842','#FF7B6E','#B2EEF4','#fff','#7ECFC8','#C8BBFF'];
+  const pieces=Array.from({length:180},()=>({x:Math.random()*canvas.width,y:-20,w:5+Math.random()*9,h:9+Math.random()*13,color:COLORS[Math.floor(Math.random()*COLORS.length)],vx:(Math.random()-.5)*6,vy:2+Math.random()*4,r:Math.random()*Math.PI*2,vr:(Math.random()-.5)*.22,life:1}));
+  const draw=()=>{
+    ctx.clearRect(0,0,canvas.width,canvas.height);let alive=false;
+    pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;p.vy+=.13;p.life-=.004;if(p.y<canvas.height&&p.life>0)alive=true;ctx.save();ctx.globalAlpha=Math.max(0,p.life);ctx.translate(p.x,p.y);ctx.rotate(p.r);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore()});
+    if(alive){_confettiFrame=requestAnimationFrame(draw);}
+    else{ctx.clearRect(0,0,canvas.width,canvas.height);_confettiFrame=null;}
+  };
+  draw();
+}
+
+/* ══════════════════════════════════════════════════════
+   AUDIO — MP3 de fondo + efectos de UI con Web Audio API
+   Toggle: un clic play, otro clic stop.
+══════════════════════════════════════════════════════ */
+const musicBtn=document.getElementById('music-btn');
+const _bgMusic=document.getElementById('bg-music');
+let musicPlaying=false;
+
+/* Contexto Web Audio sólo para efectos de UI (reveal, sparkle) */
+let _ac=null, _mg=null;
+function _ensureCtx(doResume=false){
+  if(!_ac||_ac.state==='closed'){
+    _ac=new(window.AudioContext||window.webkitAudioContext)();
+    _mg=_ac.createGain(); _mg.gain.value=0.8;
+    _mg.connect(_ac.destination);
+  }
+  if(doResume && _ac.state==='suspended') _ac.resume();
+  return _ac;
+}
+
+/* ── Timbres para efectos de UI ─────────────────────── */
+function _marimba(freq,when,dur,vol=0.18){
+  if(!_ac)return;
+  const o1=_ac.createOscillator(),g1=_ac.createGain();
+  o1.type='triangle'; o1.frequency.value=freq;
+  g1.gain.setValueAtTime(0,when);
+  g1.gain.linearRampToValueAtTime(vol,when+.008);
+  g1.gain.exponentialRampToValueAtTime(.001,when+Math.max(.05,dur*.88));
+  o1.connect(g1);g1.connect(_mg);o1.start(when);o1.stop(when+dur+.1);
+  const o2=_ac.createOscillator(),g2=_ac.createGain();
+  o2.type='sine'; o2.frequency.value=freq*2.01;
+  g2.gain.setValueAtTime(0,when);
+  g2.gain.linearRampToValueAtTime(vol*.24,when+.004);
+  g2.gain.exponentialRampToValueAtTime(.001,when+dur*.38);
+  o2.connect(g2);g2.connect(_mg);o2.start(when);o2.stop(when+dur*.45+.05);
+}
+function _steel(freq,when,dur,vol=0.06){
+  if(!_ac)return;
+  const o=_ac.createOscillator(),g=_ac.createGain();
+  o.type='square'; o.frequency.value=freq;
+  g.gain.setValueAtTime(0,when);
+  g.gain.linearRampToValueAtTime(vol,when+.003);
+  g.gain.exponentialRampToValueAtTime(.001,when+Math.max(.02,dur*.28));
+  o.connect(g);g.connect(_mg);o.start(when);o.stop(when+dur*.32+.05);
+}
+
+/* ── Música de fondo (MP3) ───────────────────────────── */
+function startMusic(){
+  musicPlaying=true;
+  _bgMusic.volume=0.82;
+  _bgMusic.play().catch(()=>{});
+}
+function stopMusic(){
+  musicPlaying=false;
+  _bgMusic.pause();
+}
+function toggleMusic(){
+  musicBtn.disabled=true;
+  setTimeout(()=>musicBtn.disabled=false,400);
+  if(musicPlaying){
+    stopMusic();
+    musicBtn.classList.remove('playing');
+    musicBtn.textContent='♪';
+  } else {
+    startMusic();
+    musicBtn.classList.add('playing');
+    musicBtn.textContent='🎵';
+  }
+}
+musicBtn.addEventListener('click',toggleMusic);
+
+/* ── Efectos de UI ───────────────────────────────────── */
+function playReveal(){
+  _ensureCtx(true);
+  if(!_ac)return;
+  const t=_ac.currentTime;
+  [261.6,329.6,392.0,523.3].forEach((f,i)=>_marimba(f,t+i*.12,.5,.1));
+}
+function playSparkle(){
+  _ensureCtx(false);
+  if(!_ac)return;
+  const t=_ac.currentTime;
+  [800,1000,1200,1600].forEach((f,i)=>_steel(f,t+i*.07,.25,.08));
+}
+
+/* ── BIOLUMINESCENCE ────────────────────────────────── */
+function initBioCanvas(){
+  const canvas=document.createElement('canvas');
+  canvas.style.cssText='position:fixed;inset:0;pointer-events:none;z-index:3;';
+  document.body.appendChild(canvas);
+  const ctx=canvas.getContext('2d');
+  const resize=()=>{canvas.width=innerWidth;canvas.height=innerHeight};
+  resize();addEventListener('resize',resize);
+  const pts=Array.from({length:90},()=>({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:.8+Math.random()*2.2,phase:Math.random()*Math.PI*2,speed:.25+Math.random()*.8,vy:-.2+Math.random()*.1,vx:(Math.random()-.5)*.08,hue:Math.random()<.5?180:160}));
+  (function draw(){
+    ctx.clearRect(0,0,canvas.width,canvas.height);const t=Date.now()/1000;
+    pts.forEach(p=>{const b=(Math.sin(t*p.speed+p.phase)+1)/2;if(b<.08)return;ctx.save();ctx.globalAlpha=b*.55;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=`hsl(${p.hue},100%,80%)`;ctx.shadowColor=`hsl(${p.hue},100%,80%)`;ctx.shadowBlur=10;ctx.fill();ctx.restore();p.y+=p.vy;p.x+=p.vx;if(p.y<-10){p.y=innerHeight+10;p.x=Math.random()*innerWidth}});
+    requestAnimationFrame(draw);
+  })();
+}
+
+/* ── SVG CREATURES ──────────────────────────────────── */
+/* fishR — cartoon tropical fish facing RIGHT
+   Round disc body, huge eye, bold cartoon outline, vivid stripes */
+function fishR(color='#E06028',accent='#8A2010',size=1){
+  const uid='fr'+Math.random().toString(36).slice(2,6);
+  const w=Math.round(94*size),h=Math.round(76*size);
+  // Lighter highlight color
+  const light=color.replace(/^#/,'');
+  return `<svg viewBox="0 0 100 82" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="${uid}b" cx="60%" cy="34%" r="58%">
+      <stop offset="0%"  stop-color="${color}" stop-opacity="1"/>
+      <stop offset="55%" stop-color="${color}" stop-opacity="1"/>
+      <stop offset="100%" stop-color="${accent}"/>
+    </radialGradient>
+    <radialGradient id="${uid}e" cx="36%" cy="32%" r="60%">
+      <stop offset="0%"   stop-color="#2A3C6A"/>
+      <stop offset="100%" stop-color="#080C18"/>
+    </radialGradient>
+    <clipPath id="${uid}c"><ellipse cx="52" cy="42" rx="33" ry="31"/></clipPath>
+  </defs>
+  <!-- TAIL — fan shape, 3 lobes with outline -->
+  <path d="M21 42 Q6 20 1 8  Q13 24 17 38Z"  fill="${color}" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M21 42 Q6 42 1 42 Q13 42 17 42Z"  fill="${color}" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M21 42 Q6 64 1 76 Q13 60 17 46Z"  fill="${color}" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- BODY with bold cartoon outline -->
+  <ellipse cx="52" cy="42" rx="33" ry="31" fill="url(#${uid}b)" stroke="#1A0800" stroke-width="2.8"/>
+  <!-- Stripes clipped to body -->
+  <g clip-path="url(#${uid}c)">
+    <rect x="39" y="11" width="13" height="62" fill="rgba(255,255,255,.93)"/>
+    <rect x="38" y="11" width="2"  height="62" fill="#1A0800" opacity=".55"/>
+    <rect x="52" y="11" width="2"  height="62" fill="#1A0800" opacity=".55"/>
+    <rect x="24" y="11" width="7"  height="62" fill="rgba(255,255,255,.5)"/>
+    <rect x="23" y="11" width="1.5" height="62" fill="#1A0800" opacity=".35"/>
+    <rect x="31" y="11" width="1.5" height="62" fill="#1A0800" opacity=".35"/>
+  </g>
+  <!-- Body shine -->
+  <ellipse cx="46" cy="30" rx="14" ry="9" fill="rgba(255,255,255,.22)" transform="rotate(-15 46 30)"/>
+  <!-- DORSAL FIN — tall, pointed cartoon style -->
+  <path d="M28 14 Q40 0 62 7 Q56 15 46 16 Q37 16 28 14Z" fill="${color}" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+  <line x1="36" y1="14" x2="40" y2="4"  stroke="#1A0800" stroke-width="1" opacity=".35"/>
+  <line x1="46" y1="12" x2="50" y2="2"  stroke="#1A0800" stroke-width="1" opacity=".3"/>
+  <line x1="56" y1="11" x2="58" y2="4"  stroke="#1A0800" stroke-width="1" opacity=".28"/>
+  <!-- PECTORAL FIN -->
+  <path d="M60 46 Q72 56 70 66 Q60 63 54 53Z" fill="${color}" stroke="#1A0800" stroke-width="1.6" stroke-linejoin="round" opacity=".85"/>
+  <!-- VENTRAL FIN -->
+  <path d="M38 70 Q46 82 54 73 Q49 66 40 66Z" fill="${color}" stroke="#1A0800" stroke-width="1.6" stroke-linejoin="round"/>
+  <!-- Gill arc -->
+  <path d="M60 15 Q66 42 60 68" stroke="#1A0800" stroke-width="2.5" fill="none" opacity=".28" stroke-linecap="round"/>
+  <!-- EYE — huge cartoon, ≈38% of body height -->
+  <circle cx="78" cy="32" r="17"   fill="white"  stroke="#1A0800" stroke-width="2.2"/>
+  <circle cx="78" cy="33" r="13"   fill="url(#${uid}e)"/>
+  <circle cx="78" cy="33" r="8.5"  fill="#060810"/>
+  <ellipse cx="83" cy="26" rx="5.5" ry="4" fill="rgba(255,255,255,.97)"/>
+  <circle  cx="71" cy="37" r="2.5"  fill="rgba(255,255,255,.4)"/>
+  <!-- Mouth -->
+  <path d="M91 44 Q96 49 93 54" stroke="#1A0800" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+/* fishL — cartoon tropical fish facing LEFT */
+function fishL(color='#E06028',accent='#8A2010',size=1){
+  const uid='fl'+Math.random().toString(36).slice(2,6);
+  const w=Math.round(94*size),h=Math.round(76*size);
+  return `<svg viewBox="0 0 100 82" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="${uid}b" cx="40%" cy="34%" r="58%">
+      <stop offset="0%"  stop-color="${color}"/>
+      <stop offset="55%" stop-color="${color}"/>
+      <stop offset="100%" stop-color="${accent}"/>
+    </radialGradient>
+    <radialGradient id="${uid}e" cx="64%" cy="32%" r="60%">
+      <stop offset="0%"   stop-color="#2A3C6A"/>
+      <stop offset="100%" stop-color="#080C18"/>
+    </radialGradient>
+    <clipPath id="${uid}c"><ellipse cx="48" cy="42" rx="33" ry="31"/></clipPath>
+  </defs>
+  <!-- TAIL — fan shape, 3 lobes -->
+  <path d="M79 42 Q94 20 99 8  Q87 24 83 38Z"  fill="${color}" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M79 42 Q94 42 99 42 Q87 42 83 42Z"  fill="${color}" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+  <path d="M79 42 Q94 64 99 76 Q87 60 83 46Z"  fill="${color}" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+  <!-- BODY with bold cartoon outline -->
+  <ellipse cx="48" cy="42" rx="33" ry="31" fill="url(#${uid}b)" stroke="#1A0800" stroke-width="2.8"/>
+  <!-- Stripes clipped to body -->
+  <g clip-path="url(#${uid}c)">
+    <rect x="48" y="11" width="13" height="62" fill="rgba(255,255,255,.93)"/>
+    <rect x="48" y="11" width="2"  height="62" fill="#1A0800" opacity=".55"/>
+    <rect x="61" y="11" width="2"  height="62" fill="#1A0800" opacity=".55"/>
+    <rect x="69" y="11" width="7"  height="62" fill="rgba(255,255,255,.5)"/>
+    <rect x="68" y="11" width="1.5" height="62" fill="#1A0800" opacity=".35"/>
+    <rect x="76" y="11" width="1.5" height="62" fill="#1A0800" opacity=".35"/>
+  </g>
+  <!-- Body shine -->
+  <ellipse cx="54" cy="30" rx="14" ry="9" fill="rgba(255,255,255,.22)" transform="rotate(15 54 30)"/>
+  <!-- DORSAL FIN -->
+  <path d="M72 14 Q60 0 38 7 Q44 15 54 16 Q63 16 72 14Z" fill="${color}" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+  <line x1="64" y1="14" x2="60" y2="4"  stroke="#1A0800" stroke-width="1" opacity=".35"/>
+  <line x1="54" y1="12" x2="50" y2="2"  stroke="#1A0800" stroke-width="1" opacity=".3"/>
+  <line x1="44" y1="11" x2="42" y2="4"  stroke="#1A0800" stroke-width="1" opacity=".28"/>
+  <!-- PECTORAL FIN -->
+  <path d="M40 46 Q28 56 30 66 Q40 63 46 53Z" fill="${color}" stroke="#1A0800" stroke-width="1.6" stroke-linejoin="round" opacity=".85"/>
+  <!-- VENTRAL FIN -->
+  <path d="M62 70 Q54 82 46 73 Q51 66 60 66Z" fill="${color}" stroke="#1A0800" stroke-width="1.6" stroke-linejoin="round"/>
+  <!-- Gill arc -->
+  <path d="M40 15 Q34 42 40 68" stroke="#1A0800" stroke-width="2.5" fill="none" opacity=".28" stroke-linecap="round"/>
+  <!-- EYE — huge cartoon -->
+  <circle cx="22" cy="32" r="17"   fill="white"  stroke="#1A0800" stroke-width="2.2"/>
+  <circle cx="22" cy="33" r="13"   fill="url(#${uid}e)"/>
+  <circle cx="22" cy="33" r="8.5"  fill="#060810"/>
+  <ellipse cx="17" cy="26" rx="5.5" ry="4" fill="rgba(255,255,255,.97)"/>
+  <circle  cx="29" cy="37" r="2.5"  fill="rgba(255,255,255,.4)"/>
+  <!-- Mouth -->
+  <path d="M9 44 Q4 49 7 54" stroke="#1A0800" stroke-width="2" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+/* ═══ NEMO — cartoon clownfish facing RIGHT, bold cartoon outline ═══ */
+function nemoR(size=1){
+  const uid='n'+Math.random().toString(36).slice(2,7);
+  const w=Math.round(128*size), h=Math.round(100*size);
+  return `<svg viewBox="0 0 134 108" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <clipPath id="${uid}bc"><ellipse cx="68" cy="56" rx="48" ry="44"/></clipPath>
+  <radialGradient id="${uid}bg" cx="60%" cy="34%" r="58%">
+    <stop offset="0%"   stop-color="#FF8C45"/>
+    <stop offset="48%"  stop-color="#E84800"/>
+    <stop offset="100%" stop-color="#A81800"/>
+  </radialGradient>
+  <radialGradient id="${uid}eg" cx="36%" cy="32%" r="62%">
+    <stop offset="0%"   stop-color="#2E4020"/>
+    <stop offset="100%" stop-color="#0A0C04"/>
+  </radialGradient>
+</defs>
+<!-- TAIL — 3 fat lobes, dark outline -->
+<path d="M22 56 Q5 34 1 20  Q14 38 18 52Z" fill="#C03000" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M22 56 Q5 56 1 56  Q14 56 18 56Z" fill="#C03000" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M22 56 Q5 78 1 92  Q14 74 18 60Z" fill="#C03000" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<!-- BODY — round, bold cartoon outline -->
+<ellipse cx="68" cy="56" rx="48" ry="44" fill="url(#${uid}bg)" stroke="#1A0800" stroke-width="3"/>
+<!-- 3 white stripes with dark borders, body-clipped -->
+<g clip-path="url(#${uid}bc)">
+  <rect x="82" y="12" width="18" height="88" fill="white" opacity=".94"/>
+  <rect x="81" y="12" width="2.5" height="88" fill="#1A0800" opacity=".75"/>
+  <rect x="100" y="12" width="2.5" height="88" fill="#1A0800" opacity=".75"/>
+  <rect x="60" y="12" width="11" height="88" fill="white" opacity=".9"/>
+  <rect x="59" y="12" width="2"  height="88" fill="#1A0800" opacity=".65"/>
+  <rect x="71" y="12" width="2"  height="88" fill="#1A0800" opacity=".65"/>
+  <rect x="43" y="12" width="8"  height="88" fill="white" opacity=".7"/>
+  <rect x="42" y="12" width="1.5" height="88" fill="#1A0800" opacity=".45"/>
+</g>
+<!-- Body shine -->
+<ellipse cx="60" cy="36" rx="22" ry="14" fill="rgba(255,255,255,.22)" transform="rotate(-15 60 36)"/>
+<!-- DORSAL FIN — tall spiny, outlined -->
+<path d="M36 14 Q52 0 82 7 Q86 9 90 14 Q78 19 64 20 Q49 20 36 14Z" fill="#C03000" stroke="#1A0800" stroke-width="2" stroke-linejoin="round"/>
+<line x1="44" y1="14" x2="48" y2="4"  stroke="#1A0800" stroke-width="1.2" opacity=".4"/>
+<line x1="56" y1="11" x2="60" y2="2"  stroke="#1A0800" stroke-width="1.2" opacity=".38"/>
+<line x1="68" y1="10" x2="70" y2="1"  stroke="#1A0800" stroke-width="1.2" opacity=".35"/>
+<line x1="78" y1="10" x2="80" y2="3"  stroke="#1A0800" stroke-width="1.2" opacity=".32"/>
+<!-- PECTORAL FIN -->
+<path d="M92 62 Q106 74 104 88 Q92 84 86 72Z" fill="#C03000" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round" opacity=".88"/>
+<!-- LUCKY FIN (smaller, rounded) -->
+<path d="M90 60 Q100 70 98 78 Q90 76 87 64Z" fill="#A02400" stroke="#1A0800" stroke-width="1.4" opacity=".7"/>
+<!-- VENTRAL FIN -->
+<path d="M52 96 Q62 108 74 98 Q68 90 54 90Z" fill="#C03000" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<!-- Gill arc -->
+<path d="M84 17 Q90 56 84 96" stroke="#1A0800" stroke-width="2.8" fill="none" opacity=".3" stroke-linecap="round"/>
+<!-- EYE — enormous Nemo eye, bold outline -->
+<circle cx="108" cy="40" r="22"  fill="white"  stroke="#1A0800" stroke-width="2.5"/>
+<circle cx="108" cy="42" r="17"  fill="url(#${uid}eg)"/>
+<circle cx="108" cy="42" r="11"  fill="#06080E"/>
+<ellipse cx="115" cy="33" rx="7" ry="5" fill="rgba(255,255,255,.97)"/>
+<circle  cx="100" cy="47" r="3.5" fill="rgba(255,255,255,.42)"/>
+<!-- Mouth (smile) -->
+<path d="M122 57 Q128 63 124 68" stroke="#1A0800" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+</svg>`;
+}
+
+/* ═══ MARLIN — cartoon clownfish (dad), facing RIGHT, worried look, bold outline ═══ */
+function marlinR(size=1){
+  const uid='m'+Math.random().toString(36).slice(2,7);
+  const w=Math.round(136*size), h=Math.round(108*size);
+  return `<svg viewBox="0 0 142 112" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <clipPath id="${uid}bc"><ellipse cx="72" cy="58" rx="52" ry="46"/></clipPath>
+  <radialGradient id="${uid}bg" cx="60%" cy="34%" r="58%">
+    <stop offset="0%"   stop-color="#FF7A38"/>
+    <stop offset="50%"  stop-color="#DC3C00"/>
+    <stop offset="100%" stop-color="#981000"/>
+  </radialGradient>
+  <radialGradient id="${uid}eg" cx="36%" cy="32%" r="62%">
+    <stop offset="0%"   stop-color="#2E2010"/>
+    <stop offset="100%" stop-color="#0A0604"/>
+  </radialGradient>
+</defs>
+<!-- TAIL — 2 lobes, bold outline -->
+<path d="M22 58 Q5 34 0 18  Q14 40 18 54Z" fill="#B82000" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M22 58 Q5 82 0 98  Q14 76 18 62Z" fill="#B82000" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<!-- BODY — rounded, bold cartoon outline -->
+<ellipse cx="72" cy="58" rx="52" ry="46" fill="url(#${uid}bg)" stroke="#1A0800" stroke-width="3"/>
+<!-- 3 stripes with dark borders, body-clipped -->
+<g clip-path="url(#${uid}bc)">
+  <rect x="86" y="12" width="18" height="92" fill="white" opacity=".92"/>
+  <rect x="85" y="12" width="2.5" height="92" fill="#1A0800" opacity=".72"/>
+  <rect x="104" y="12" width="2.5" height="92" fill="#1A0800" opacity=".72"/>
+  <rect x="64" y="12" width="11" height="92" fill="white" opacity=".88"/>
+  <rect x="63" y="12" width="2"  height="92" fill="#1A0800" opacity=".62"/>
+  <rect x="75" y="12" width="2"  height="92" fill="#1A0800" opacity=".62"/>
+  <rect x="46" y="12" width="8"  height="92" fill="white" opacity=".67"/>
+  <rect x="45" y="12" width="1.5" height="92" fill="#1A0800" opacity=".42"/>
+</g>
+<!-- Shine -->
+<ellipse cx="64" cy="38" rx="24" ry="15" fill="rgba(255,255,255,.22)" transform="rotate(-13 64 38)"/>
+<!-- DORSAL FIN — tall spiny, outlined -->
+<path d="M42 16 Q58 1 90 8 Q94 9 98 14 Q86 20 72 21 Q56 21 42 16Z" fill="#B82000" stroke="#1A0800" stroke-width="2" stroke-linejoin="round"/>
+<line x1="50" y1="16" x2="55" y2="5"  stroke="#1A0800" stroke-width="1.2" opacity=".4"/>
+<line x1="62" y1="13" x2="66" y2="3"  stroke="#1A0800" stroke-width="1.2" opacity=".37"/>
+<line x1="74" y1="11" x2="76" y2="2"  stroke="#1A0800" stroke-width="1.2" opacity=".35"/>
+<line x1="84" y1="11" x2="86" y2="3"  stroke="#1A0800" stroke-width="1.2" opacity=".32"/>
+<!-- PECTORAL FIN -->
+<path d="M98 66 Q114 78 112 92 Q98 88 92 74Z" fill="#B82000" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round" opacity=".88"/>
+<!-- VENTRAL FIN -->
+<path d="M56 100 Q68 112 80 102 Q74 94 58 94Z" fill="#B82000" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<!-- Gill arc -->
+<path d="M90 18 Q96 58 90 98" stroke="#1A0800" stroke-width="2.8" fill="none" opacity=".3" stroke-linecap="round"/>
+<!-- EYE — large cartoon, outlined, worried expression -->
+<circle cx="114" cy="44" r="22"  fill="white"  stroke="#1A0800" stroke-width="2.5"/>
+<circle cx="114" cy="46" r="17"  fill="url(#${uid}eg)"/>
+<circle cx="114" cy="46" r="11"  fill="#06080E"/>
+<ellipse cx="121" cy="37" rx="7" ry="5" fill="rgba(255,255,255,.97)"/>
+<circle  cx="106" cy="51" r="3.2" fill="rgba(255,255,255,.42)"/>
+<!-- Worried brow lines -->
+<path d="M102 30 Q110 24 120 29" stroke="#1A0800" stroke-width="3" fill="none" stroke-linecap="round" opacity=".85"/>
+<!-- Slight frown -->
+<path d="M126 60 Q133 65 130 70" stroke="#1A0800" stroke-width="2.3" fill="none" stroke-linecap="round"/>
+</svg>`;
+}
+
+/* ═══ DORY — cartoon blue tang, facing LEFT, huge eyes, yellow tail, bold outline ═══ */
+function doryL(size=1){
+  const uid='d'+Math.random().toString(36).slice(2,7);
+  const w=Math.round(124*size), h=Math.round(100*size);
+  return `<svg viewBox="0 0 130 106" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg">
+<defs>
+  <clipPath id="${uid}bc"><ellipse cx="60" cy="54" rx="48" ry="44"/></clipPath>
+  <radialGradient id="${uid}bg" cx="38%" cy="34%" r="60%">
+    <stop offset="0%"   stop-color="#38AAFF"/>
+    <stop offset="52%"  stop-color="#1468D8"/>
+    <stop offset="100%" stop-color="#0838B8"/>
+  </radialGradient>
+  <radialGradient id="${uid}eg" cx="62%" cy="32%" r="60%">
+    <stop offset="0%"   stop-color="#1C3020"/>
+    <stop offset="100%" stop-color="#060808"/>
+  </radialGradient>
+</defs>
+<!-- YELLOW TAIL — 3 fat lobes, bold outline -->
+<path d="M106 54 Q122 34 130 22 Q118 42 114 52Z" fill="#F5C200" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M106 54 Q122 54 130 54 Q118 54 114 54Z" fill="#F5C200" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<path d="M106 54 Q122 74 130 86 Q118 66 114 56Z" fill="#F5C200" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<!-- BODY — round blue disc, bold cartoon outline -->
+<ellipse cx="60" cy="54" rx="48" ry="44" fill="url(#${uid}bg)" stroke="#1A0800" stroke-width="3"/>
+<!-- Yellow tail-edge accent -->
+<path d="M104 38 Q116 54 104 70" stroke="#F5C200" stroke-width="11" fill="none" opacity=".55" stroke-linecap="round"/>
+<!-- Black horizontal stripe clipped to body -->
+<g clip-path="url(#${uid}bc)">
+  <rect x="10" y="48" width="98" height="14" fill="rgba(0,0,16,.76)"/>
+  <rect x="10" y="47" width="98" height="2"  fill="rgba(0,0,16,.4)"/>
+  <rect x="10" y="62" width="98" height="2"  fill="rgba(0,0,16,.4)"/>
+</g>
+<!-- Body shine -->
+<ellipse cx="52" cy="34" rx="20" ry="12" fill="rgba(140,200,255,.28)" transform="rotate(-14 52 34)"/>
+<!-- DORSAL FIN — tall, bold outline -->
+<path d="M72 13 Q56 0 38 7 Q44 17 54 18 Q64 19 72 13Z" fill="#1468D8" stroke="#1A0800" stroke-width="2" stroke-linejoin="round"/>
+<line x1="65" y1="13" x2="62" y2="3"  stroke="#1A0800" stroke-width="1.1" opacity=".38"/>
+<line x1="56" y1="11" x2="52" y2="2"  stroke="#1A0800" stroke-width="1.1" opacity=".35"/>
+<line x1="46" y1="11" x2="43" y2="3"  stroke="#1A0800" stroke-width="1.1" opacity=".3"/>
+<!-- YELLOW PECTORAL FIN — Dory's signature! -->
+<path d="M46 58 Q32 72 34 84 Q46 80 50 68Z" fill="#F5C200" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<!-- VENTRAL FIN -->
+<path d="M54 94 Q62 106 72 96 Q68 88 56 88Z" fill="#1468D8" stroke="#1A0800" stroke-width="1.8" stroke-linejoin="round"/>
+<!-- Gill arc -->
+<path d="M42 16 Q36 54 42 92" stroke="#1A0800" stroke-width="2.8" fill="none" opacity=".3" stroke-linecap="round"/>
+<!-- EYE — enormous, Dory's most iconic feature, bold outline -->
+<circle cx="18" cy="40" r="22"  fill="white"  stroke="#1A0800" stroke-width="2.5"/>
+<circle cx="18" cy="42" r="17"  fill="url(#${uid}eg)"/>
+<circle cx="18" cy="42" r="11"  fill="#060808"/>
+<ellipse cx="11" cy="33" rx="7" ry="5" fill="rgba(255,255,255,.97)"/>
+<circle  cx="26" cy="48" r="3.5" fill="rgba(255,255,255,.42)"/>
+<!-- Eyelid arc (sweet expression) -->
+<path d="M4 30 Q18 18 32 30" stroke="#1A0800" stroke-width="2.8" fill="none" opacity=".55"/>
+<!-- Mouth -->
+<path d="M4 57 Q0 63 3 70" stroke="#1A0800" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+</svg>`;
+}
+/* Whale facing RIGHT → whale-swim (LTR) */
+function whaleSVG(){
+  return `<svg viewBox="0 0 240 105" width="240" height="105" xmlns="http://www.w3.org/2000/svg">
+    <path d="M0 55 Q12 42 22 52 L18 70 Q10 72 0 55Z" fill="#1C7BA8" opacity=".75"/>
+    <path d="M18 60 Q60 30 130 38 Q180 40 208 55 Q220 60 225 68 L208 78 Q180 84 130 76 Q70 70 25 82 Q12 84 18 75Z" fill="#1C7BA8" opacity=".85"/>
+    <path d="M130 38 Q145 18 160 30 Q150 34 140 38Z" fill="#1565A8" opacity=".8"/>
+    <path d="M60 70 Q130 80 195 72" stroke="rgba(255,255,255,.2)" stroke-width="12" fill="none" stroke-linecap="round"/>
+    <path d="M85 70 Q75 88 65 82 Q70 72 80 70Z" fill="#1565A8" opacity=".7"/>
+    <ellipse cx="210" cy="52" rx="9" ry="6" fill="rgba(255,255,255,.9)"/>
+    <circle  cx="211" cy="52" r="4"   fill="#0A2A35"/>
+    <circle  cx="212" cy="50" r="1.5" fill="white"/>
+    <circle cx="215" cy="38" r="3" fill="rgba(255,255,255,.5)"/>
+    <ellipse cx="218" cy="32" rx="2" ry="4" fill="rgba(255,255,255,.35)" transform="rotate(15 218 32)"/>
+  </svg>`;
+}
+/* Turtle facing LEFT → turtle-swim (RTL) — v2 redesign, 3/4 view, 2 eyes */
+/* Turtle — vista lateral, UN solo ojo hermoso */
+function turtleSVG(){
+  const uid='t'+Math.random().toString(36).slice(2,6);
+  return `<svg viewBox="0 0 178 108" width="178" height="108" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="${uid}sh" cx="42%" cy="30%" r="56%">
+      <stop offset="0%"   stop-color="#3CA865"/>
+      <stop offset="50%"  stop-color="#217A42"/>
+      <stop offset="100%" stop-color="#0E4220"/>
+    </radialGradient>
+    <radialGradient id="${uid}sk" cx="40%" cy="35%" r="58%">
+      <stop offset="0%"   stop-color="#52C47A"/>
+      <stop offset="55%"  stop-color="#2E8B57"/>
+      <stop offset="100%" stop-color="#1A5438"/>
+    </radialGradient>
+    <radialGradient id="${uid}hd" cx="38%" cy="34%" r="55%">
+      <stop offset="0%"   stop-color="#58C882"/>
+      <stop offset="100%" stop-color="#267848"/>
+    </radialGradient>
+    <radialGradient id="${uid}ir" cx="34%" cy="30%" r="62%">
+      <stop offset="0%"   stop-color="#D4A820"/>
+      <stop offset="55%"  stop-color="#A07810"/>
+      <stop offset="100%" stop-color="#5A4005"/>
+    </radialGradient>
+  </defs>
+
+  <!-- ALETA TRASERA LEJANA (lado opuesto) -->
+  <path d="M134 64 Q152 56 165 58 Q168 68 160 74 Q148 72 136 68Z"
+    fill="#1E6B40" opacity=".55"/>
+  <!-- ALETA DELANTERA LEJANA -->
+  <path d="M84 58 Q76 42 62 36 Q55 44 60 52 Q70 56 82 60Z"
+    fill="#1E6B40" opacity=".55"/>
+
+  <!-- COLA -->
+  <path d="M152 65 Q166 60 172 65 Q166 70 152 69Z" fill="#267848"/>
+
+  <!-- PLASTRON (vientre) -->
+  <ellipse cx="108" cy="72" rx="52" ry="20" fill="#3DA862"/>
+
+  <!-- CAPARAZÓN — domo principal -->
+  <path d="M60 66 Q64 28 108 20 Q152 28 156 66 Q156 82 108 86 Q60 82 60 66Z"
+    fill="url(#${uid}sh)" stroke="#0D3020" stroke-width="1.5"/>
+
+  <!-- Patrón de escamas del caparazón -->
+  <!-- Escudo vertebral central -->
+  <path d="M86 32 L108 24 L130 32 L132 62 L108 68 L84 62Z"
+    fill="rgba(255,255,255,.05)" stroke="#0A2810" stroke-width="2" opacity=".8"/>
+  <!-- Escudos costales izquierdos -->
+  <path d="M86 32 L66 46 L68 64 L84 62Z"
+    fill="rgba(0,0,0,.08)" stroke="#0A2810" stroke-width="1.4" opacity=".75"/>
+  <path d="M66 46 L62 66 L65 78 L68 66Z"
+    fill="rgba(0,0,0,.07)" stroke="#0A2810" stroke-width="1.2" opacity=".65"/>
+  <!-- Escudos costales derechos -->
+  <path d="M130 32 L150 46 L148 64 L132 62Z"
+    fill="rgba(0,0,0,.08)" stroke="#0A2810" stroke-width="1.4" opacity=".75"/>
+  <path d="M150 46 L154 66 L151 78 L148 66Z"
+    fill="rgba(0,0,0,.07)" stroke="#0A2810" stroke-width="1.2" opacity=".65"/>
+  <!-- Brillo del caparazón -->
+  <ellipse cx="102" cy="42" rx="32" ry="13" fill="rgba(255,255,255,.13)" transform="rotate(-8 102 42)"/>
+  <ellipse cx="100" cy="34" rx="15" ry="5" fill="rgba(255,255,255,.09)"/>
+
+  <!-- ALETA DELANTERA VISIBLE -->
+  <path d="M82 64 Q66 76 48 86 Q43 76 48 69 Q62 65 80 66Z"
+    fill="url(#${uid}sk)" stroke="#0D3020" stroke-width="1.2"/>
+  <!-- Textura de la aleta -->
+  <path d="M50 84 Q58 78 68 75" stroke="rgba(255,255,255,.18)" stroke-width="1" fill="none"/>
+  <path d="M48 76 Q56 72 66 70" stroke="rgba(255,255,255,.14)" stroke-width=".9" fill="none"/>
+
+  <!-- ALETA TRASERA VISIBLE -->
+  <path d="M136 66 Q148 80 158 84 Q162 74 156 68 Q148 66 138 66Z"
+    fill="url(#${uid}sk)" stroke="#0D3020" stroke-width="1.2"/>
+
+  <!-- CUELLO -->
+  <path d="M62 62 Q55 54 48 52 Q40 56 42 66 Q46 73 56 70 Q64 67 64 64Z"
+    fill="url(#${uid}hd)"/>
+
+  <!-- CABEZA — perfil lateral izquierdo -->
+  <ellipse cx="36" cy="58" rx="24" ry="18" fill="url(#${uid}hd)"
+    stroke="#0D3020" stroke-width="1.4"/>
+  <!-- Textura de escamas en la cabeza -->
+  <path d="M16 50 Q28 46 42 49" stroke="#1A5438" stroke-width="1.3" fill="none" opacity=".45"/>
+  <path d="M14 58 Q26 55 40 57" stroke="#1A5438" stroke-width="1.1" fill="none" opacity=".38"/>
+  <path d="M16 65 Q27 63 38 63" stroke="#1A5438" stroke-width=".9" fill="none" opacity=".3"/>
+  <!-- Brillo de la cabeza -->
+  <ellipse cx="30" cy="50" rx="13" ry="6" fill="rgba(255,255,255,.12)" transform="rotate(-18 30 50)"/>
+
+  <!-- ═══ UN SOLO OJO — bello, ámbar, perfil lateral ═══ -->
+  <!-- Órbita (sombra sutil alrededor) -->
+  <circle cx="24" cy="52" r="12" fill="#1E6040" opacity=".7"/>
+  <!-- Esclerótica blanca -->
+  <circle cx="24" cy="52" r="10" fill="white" stroke="#0A2810" stroke-width="1.2"/>
+  <!-- Iris ámbar-dorado (color real de tortuga marina) -->
+  <circle cx="24" cy="52" r="8"  fill="url(#${uid}ir)"/>
+  <!-- Pupila oval vertical (reptil) -->
+  <ellipse cx="24" cy="52" rx="3.2" ry="5" fill="#06080A"/>
+  <!-- Reflejo principal (grande, brillante) -->
+  <ellipse cx="27.5" cy="47.5" rx="3.8" ry="2.6" fill="rgba(255,255,255,.97)"/>
+  <!-- Reflejo secundario -->
+  <circle cx="20.5" cy="55.5" r="1.6" fill="rgba(255,255,255,.45)"/>
+  <!-- Línea de párpado superior -->
+  <path d="M14 48 Q24 43 34 48" stroke="#0A2810" stroke-width="1.6" fill="none" opacity=".65" stroke-linecap="round"/>
+  <!-- Línea de párpado inferior -->
+  <path d="M14 57 Q24 61 34 57" stroke="#0A2810" stroke-width="1.1" fill="none" opacity=".4" stroke-linecap="round"/>
+
+  <!-- NARINAS -->
+  <ellipse cx="14" cy="55" rx="1.6" ry="1.1" fill="#0D2E1A" opacity=".65"/>
+  <ellipse cx="14" cy="58.5" rx="1.5" ry="1"  fill="#0D2E1A" opacity=".55"/>
+  <!-- BOCA (leve sonrisa) -->
+  <path d="M13 63 Q22 68 32 65" stroke="#0D3020" stroke-width="1.4" fill="none"
+    stroke-linecap="round" opacity=".55"/>
+
+  <!-- GARRAS en aleta delantera -->
+  <path d="M48 84 L44 90" stroke="#0D2E1A" stroke-width="1.8" stroke-linecap="round" opacity=".65"/>
+  <path d="M53 88 L50 94" stroke="#0D2E1A" stroke-width="1.6" stroke-linecap="round" opacity=".55"/>
+  <path d="M58 90 L56 96" stroke="#0D2E1A" stroke-width="1.4" stroke-linecap="round" opacity=".45"/>
+  </svg>`;
+}
+function jellyfishSVG(color){
+  return `<svg viewBox="0 0 64 90" width="52" height="73" xmlns="http://www.w3.org/2000/svg">
+  <!-- Bell (dome) -->
+  <path d="M4 32 Q4 6 32 4 Q60 6 60 32 Q60 46 32 50 Q4 46 4 32Z" fill="${color}" opacity=".75"/>
+  <!-- Inner glow of bell -->
+  <path d="M12 28 Q12 12 32 10 Q52 12 52 28 Q52 36 32 38 Q12 36 12 28Z" fill="rgba(255,255,255,.18)"/>
+  <!-- Top shine highlight -->
+  <ellipse cx="32" cy="18" rx="14" ry="8" fill="rgba(255,255,255,.14)"/>
+  <!-- Oral arms (wavy, thick) -->
+  <path d="M20 48 Q18 58 22 68 Q20 76 18 88" stroke="${color}" stroke-width="3"   fill="none" stroke-linecap="round" opacity=".72"/>
+  <path d="M32 50 Q30 62 34 72 Q32 80 30 90"  stroke="${color}" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".78"/>
+  <path d="M44 48 Q46 58 42 68 Q44 76 46 88" stroke="${color}" stroke-width="3"   fill="none" stroke-linecap="round" opacity=".72"/>
+  <!-- Thin tentacles (more delicate) -->
+  <path d="M14 46 Q10 60 12 74" stroke="${color}" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".5"/>
+  <path d="M26 50 Q22 64 24 78" stroke="${color}" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".5"/>
+  <path d="M38 50 Q42 64 40 78" stroke="${color}" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".5"/>
+  <path d="M50 46 Q54 60 52 74" stroke="${color}" stroke-width="1.5" fill="none" stroke-linecap="round" opacity=".5"/>
+  <!-- Bottom fringe of bell -->
+  <path d="M4 32 Q10 52 20 48 Q26 52 32 50 Q38 52 44 48 Q54 52 60 32" stroke="${color}" stroke-width="1" fill="none" opacity=".4"/>
+  </svg>`;
+}
+/* ═══ SEAHORSE — beautiful, detailed, with crown + segments ═══ */
+function seahorseSVG(color='#E8820C', belly='#F5A830', fin='rgba(255,180,80,.55)'){
+  return `<svg viewBox="0 0 58 100" width="46" height="80" xmlns="http://www.w3.org/2000/svg">
+    <!-- ── CURLED TAIL ── -->
+    <path d="M30 78 Q42 82 44 74 Q46 65 38 61 Q30 57 27 63 Q24 70 30 76"
+      stroke="${color}" stroke-width="10" fill="none" stroke-linecap="round"/>
+    <path d="M30 78 Q40 81 42 74 Q44 66 37 62 Q30 58 28 64 Q26 70 30 76"
+      stroke="${belly}" stroke-width="5.5" fill="none" stroke-linecap="round" opacity=".6"/>
+
+    <!-- ── BODY (S-curve) — outer dark stroke for 3D look ── -->
+    <path d="M32 22 Q44 30 42 46 Q40 60 30 66"
+      stroke="${color}" stroke-width="16" fill="none" stroke-linecap="round"/>
+    <!-- Body inner belly (lighter) -->
+    <path d="M28 22 Q18 30 18 46 Q18 60 28 66"
+      stroke="${belly}" stroke-width="10" fill="none" stroke-linecap="round" opacity=".55"/>
+
+    <!-- ── BODY SEGMENTS / RINGS ── (armor plates) -->
+    <path d="M22 30 Q30 28 38 30" stroke="rgba(0,0,0,.2)" stroke-width="1.5" fill="none"/>
+    <path d="M20 36 Q30 34 40 36" stroke="rgba(0,0,0,.2)" stroke-width="1.5" fill="none"/>
+    <path d="M20 42 Q30 40 40 42" stroke="rgba(0,0,0,.2)" stroke-width="1.5" fill="none"/>
+    <path d="M21 48 Q30 46 39 48" stroke="rgba(0,0,0,.2)" stroke-width="1.5" fill="none"/>
+    <path d="M22 54 Q30 52 38 54" stroke="rgba(0,0,0,.2)" stroke-width="1.5" fill="none"/>
+    <path d="M24 60 Q30 58 36 60" stroke="rgba(0,0,0,.2)" stroke-width="1.5" fill="none"/>
+    <!-- Highlight lines on segments -->
+    <path d="M22 30 Q30 28 38 30" stroke="rgba(255,255,255,.2)" stroke-width=".8" fill="none"/>
+    <path d="M20 36 Q30 34 40 36" stroke="rgba(255,255,255,.2)" stroke-width=".8" fill="none"/>
+    <path d="M20 42 Q30 40 40 42" stroke="rgba(255,255,255,.2)" stroke-width=".8" fill="none"/>
+    <path d="M21 48 Q30 46 39 48" stroke="rgba(255,255,255,.2)" stroke-width=".8" fill="none"/>
+    <path d="M22 54 Q30 52 38 54" stroke="rgba(255,255,255,.2)" stroke-width=".8" fill="none"/>
+
+    <!-- ── DORSAL FIN (rippling, translucent) ── -->
+    <path d="M38 26 Q50 20 52 30 Q50 38 42 36 Q38 34 38 30Z"
+      fill="${fin}" stroke="${color}" stroke-width="1"/>
+    <path d="M40 27 Q48 22 50 30 Q48 36 42 34" stroke="rgba(255,255,255,.3)" stroke-width=".8" fill="none"/>
+
+    <!-- ── PECTORAL FINS (tiny, near neck) ── -->
+    <path d="M24 24 Q14 20 12 26 Q14 32 24 28Z"
+      fill="${fin}" stroke="${color}" stroke-width=".8"/>
+
+    <!-- ── HEAD ── -->
+    <ellipse cx="26" cy="17" rx="13" ry="11" fill="${color}"/>
+    <!-- Head segment line -->
+    <path d="M14 17 Q26 13 38 17" stroke="rgba(0,0,0,.15)" stroke-width="1.2" fill="none"/>
+
+    <!-- ── SNOUT (long, tubular) ── -->
+    <path d="M36 13 Q54 10 57 15 Q54 19 36 20Z" fill="${color}"/>
+    <path d="M38 14 Q53 12 55 15" stroke="${belly}" stroke-width="2.5" fill="none" opacity=".5" stroke-linecap="round"/>
+
+    <!-- ── CORONET / CROWN (spines on top of head) ── -->
+    <line x1="16" y1="8"  x2="14" y2="1"  stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="20" y1="6"  x2="18" y2="0"  stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="24" y1="6"  x2="22" y2="1"  stroke="${color}" stroke-width="2.5" stroke-linecap="round"/>
+    <line x1="28" y1="7"  x2="27" y2="2"  stroke="${color}" stroke-width="2"   stroke-linecap="round"/>
+    <line x1="32" y1="8"  x2="32" y2="3"  stroke="${color}" stroke-width="2"   stroke-linecap="round"/>
+    <!-- Crown tips glow -->
+    <circle cx="14" cy="1"  r="1.5" fill="${belly}" opacity=".8"/>
+    <circle cx="18" cy="0"  r="1.5" fill="${belly}" opacity=".8"/>
+    <circle cx="22" cy="1"  r="1.5" fill="${belly}" opacity=".8"/>
+    <circle cx="27" cy="2"  r="1.2" fill="${belly}" opacity=".7"/>
+    <circle cx="32" cy="3"  r="1.2" fill="${belly}" opacity=".7"/>
+
+    <!-- ── EYE ── -->
+    <circle cx="30" cy="14" r="5"   fill="rgba(0,0,0,.5)"/>
+    <circle cx="30" cy="14" r="4"   fill="rgba(255,255,255,.9)"/>
+    <circle cx="30" cy="14" r="2.8" fill="#0A0A20"/>
+    <circle cx="32" cy="12" r="1.2" fill="white"/>
+
+    <!-- ── BELLY GLOW (bioluminescent patches) ── -->
+    <ellipse cx="25" cy="38" rx="4" ry="2" fill="rgba(255,220,120,.2)"/>
+    <ellipse cx="25" cy="46" rx="3.5" ry="2" fill="rgba(255,220,120,.18)"/>
+    <ellipse cx="26" cy="54" rx="3" ry="1.8" fill="rgba(255,220,120,.15)"/>
+  </svg>`;
+}
+function starfishSVG(){
+  const uid='sf'+Math.random().toString(36).slice(2,6);
+  return `<svg viewBox="0 0 70 70" width="54" height="54" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="${uid}" cx="42%" cy="38%" r="58%">
+      <stop offset="0%" stop-color="#FF9580"/>
+      <stop offset="100%" stop-color="#E84040"/>
+    </radialGradient>
+  </defs>
+  <!-- 5 arms using smooth rounded paths -->
+  <path d="M35 35 Q32 22 30 10 Q35 16 40 10 Q38 22 35 35Z" fill="url(#${uid})" opacity=".9"/>
+  <path d="M35 35 Q47 27 58 18 Q56 25 62 32 Q50 33 35 35Z" fill="url(#${uid})" opacity=".9"/>
+  <path d="M35 35 Q49 43 58 54 Q51 53 50 60 Q43 50 35 35Z" fill="url(#${uid})" opacity=".9"/>
+  <path d="M35 35 Q21 43 12 54 Q11 47 5 46 Q16 40 35 35Z" fill="url(#${uid})" opacity=".9"/>
+  <path d="M35 35 Q23 27 12 18 Q18 24 12 32 Q24 32 35 35Z" fill="url(#${uid})" opacity=".9"/>
+  <!-- Texture dots on arms -->
+  <circle cx="35" cy="16" r="2"   fill="rgba(255,255,255,.35)"/>
+  <circle cx="35" cy="12" r="1.2" fill="rgba(255,255,255,.25)"/>
+  <circle cx="54" cy="26" r="2"   fill="rgba(255,255,255,.35)"/>
+  <circle cx="58" cy="24" r="1.2" fill="rgba(255,255,255,.25)"/>
+  <circle cx="50" cy="52" r="2"   fill="rgba(255,255,255,.35)"/>
+  <circle cx="12" cy="50" r="2"   fill="rgba(255,255,255,.35)"/>
+  <circle cx="14" cy="22" r="2"   fill="rgba(255,255,255,.35)"/>
+  <!-- Central disc -->
+  <circle cx="35" cy="35" r="9"   fill="#E84040"/>
+  <circle cx="35" cy="35" r="6.5" fill="#FF7060"/>
+  <circle cx="35" cy="35" r="4"   fill="#FF9080" opacity=".7"/>
+  <!-- Centre shine -->
+  <circle cx="33" cy="33" r="2"   fill="rgba(255,255,255,.4)"/>
+  </svg>`;
+}
+
+/* ── SPAWNERS ───────────────────────────────────────── */
+const layer=document.getElementById('swimmers');
+const PALETTES=[
+  ['#E06028','#8A2010'],  // warm orange-brown
+  ['#E8B818','#A07808'],  // golden yellow
+  ['#2848D0','#0A1888'],  // deep indigo-blue
+  ['#18A0C0','#086880'],  // ocean teal
+  ['#C03870','#800830'],  // hot magenta-pink
+  ['#B84010','#7A2008'],  // fiery red-orange
+  ['#38B860','#18803A'],  // tropical green
+  ['#7840C0','#480898'],  // vibrant purple
+];
+
+/* ── LANE MANAGER: prevents vertical clustering of swimmers ── */
+// Screen divided into 9 bands. Each active swim claims a band, releases it when done.
+const _lanes=new Array(9).fill(0); // usage counter per band
+function _claimLane(minPct=5,maxPct=82){
+  const bands=_lanes.length;
+  const range=maxPct-minPct;
+  // pick the least-used band (with some jitter so it's not perfectly even)
+  let best=-1,bestScore=Infinity;
+  for(let i=0;i<bands;i++){
+    const score=_lanes[i]+Math.random()*.6;
+    if(score<bestScore){bestScore=score;best=i;}
+  }
+  _lanes[best]++;
+  const bW=range/bands;
+  const yPct=minPct+best*bW+Math.random()*bW*.8;
+  return {yPct,release:()=>{_lanes[best]=Math.max(0,_lanes[best]-1);}};
+}
+
+/* ── GRID PLACER: spread static floaters across a grid ── */
+function _gridPositions(n,cols,rows,x0=5,x1=90,y0=8,y1=72){
+  const cells=[];
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)cells.push([c,r]);
+  cells.sort(()=>Math.random()-.5);
+  const cW=(x1-x0)/cols,rH=(y1-y0)/rows;
+  return cells.slice(0,n).map(([c,r])=>({
+    x:x0+c*cW+Math.random()*cW*.7,
+    y:y0+r*rH+Math.random()*rH*.7,
+  }));
+}
+
+/* ── SPAWN HELPER: adds element with guaranteed smooth entry ──
+ * animation-fill-mode:backwards → 0% keyframe applied during delay,
+ * so opacity:0 is held even before the animation clock starts.
+ * This eliminates the "pop in" flash completely.
+ */
+function _spawn(el, animStr, onEnd){
+  // backwards = hold first keyframe during delay (keeps opacity:0)
+  el.style.animation = animStr;
+  el.style.animationFillMode = 'backwards';
+  layer.appendChild(el);
+  if(onEnd) el.addEventListener('animationend', onEnd, {once:true});
+}
+
+function spawnFishSchool(){
+  const goRight = Math.random() < .5;
+  const {yPct, release} = _claimLane(8, 80);
+  // Minimal: 1–2 fish per school for clean, spacious feel
+  const count = 1 + Math.floor(Math.random() * 2);
+  const dur   = 16 + Math.random() * 8;
+  for(let i = 0; i < count; i++){
+    const [c1,c2] = PALETTES[Math.floor(Math.random()*PALETTES.length)];
+    const sz = .6 + Math.random() * .65;
+    const el = document.createElement('div');
+    el.className = 'swimmer';
+    el.innerHTML = goRight ? fishR(c1,c2,sz) : fishL(c1,c2,sz);
+    const oy = (Math.random()-.5)*28;
+    el.style.cssText = `top:calc(${yPct}% + ${oy}px);left:0;`;
+    // stagger each fish; backwards fill keeps them invisible during delay
+    const delay = i * 0.7;
+    _spawn(el,
+      `${goRight?'swim-ltr':'swim-rtl'} ${dur+i*1.5}s linear ${delay}s forwards`,
+      ()=>{ el.remove(); if(i===count-1) release(); }
+    );
+  }
+}
+
+function spawnNemoAndDory(){
+  const {yPct:yN, release:rN} = _claimLane(10, 52);
+  const {yPct:yD, release:rD} = _claimLane(22, 66);
+  const dur = 18 + Math.random() * 5;
+  const withMarlin = Math.random() < .4; // 40% chance
+
+  // Nemo → LTR (no delay → starts invisible from keyframe 0%)
+  const elN = document.createElement('div'); elN.className='swimmer';
+  elN.innerHTML = nemoR(1.1);
+  elN.style.cssText = `top:${yN}%;left:0;`;
+  _spawn(elN, `nemo-swim ${dur}s ease-in-out 0s forwards`,
+    ()=>{ elN.remove(); rN(); });
+
+  // Dory ← RTL (delay 1.4s — backwards fill holds opacity:0 during delay)
+  const elD = document.createElement('div'); elD.className='swimmer';
+  elD.innerHTML = doryL(1.1);
+  elD.style.cssText = `top:${yD}%;left:0;`;
+  _spawn(elD, `dory-swim ${dur+3}s ease-in-out 1.4s forwards`,
+    ()=>{ elD.remove(); rD(); });
+
+  // Marlin → LTR (delay 4s)
+  if(withMarlin){
+    const {yPct:yM, release:rM} = _claimLane(10, 52);
+    const elM = document.createElement('div'); elM.className='swimmer';
+    elM.innerHTML = marlinR(1.0);
+    elM.style.cssText = `top:${yM}%;left:0;`;
+    _spawn(elM, `nemo-swim ${dur+2}s ease-in-out 4s forwards`,
+      ()=>{ elM.remove(); rM(); });
+  }
+}
+
+function spawnWhale(){
+  const {yPct, release} = _claimLane(6, 26);
+  const el = document.createElement('div'); el.className='swimmer';
+  el.innerHTML = whaleSVG();
+  el.style.cssText = `top:${yPct}%;left:0;`;
+  _spawn(el, `whale-swim ${34+Math.random()*14}s linear 0s forwards`,
+    ()=>{ el.remove(); release(); });
+}
+
+function spawnTurtle(){
+  const {yPct, release} = _claimLane(28, 70);
+  const el = document.createElement('div'); el.className='swimmer';
+  el.innerHTML = turtleSVG();
+  el.style.cssText = `top:${yPct}%;right:0;left:auto;`;
+  _spawn(el, `turtle-swim ${24+Math.random()*12}s linear 0s forwards`,
+    ()=>{ el.remove(); release(); });
+}
+
+/* Static floaters use chained animations:
+ * floater-in (2s, once) → bob/float (∞)
+ * No delay on floater-in, so element is always invisible at t=0.
+ * After floater-in ends, the looping animation takes over cleanly.
+ */
+function spawnJellyfish(){
+  const JCOLORS=['#9BE4F0','#C8BBFF','#FFB8EE','#B2EEF4','#80FFD4'];
+  // Minimal: only 3 jellyfish, spread across a 3×1 grid
+  const positions = _gridPositions(3, 3, 1, 8, 85, 8, 58);
+  positions.forEach((pos, i)=>{
+    const color = JCOLORS[i % JCOLORS.length];
+    const el = document.createElement('div'); el.className='swimmer';
+    el.innerHTML = jellyfishSVG(color);
+    const bobDur  = 3.2 + Math.random() * 2.5;
+    const inDelay = i * 1.8; // stagger so they don't all appear together
+    el.style.cssText = `left:${pos.x}%;top:${pos.y}%;`;
+    // floater-in fades in, then jelly-bob loops — both use backwards fill
+    el.style.animation =
+      `floater-in 2s ease-out ${inDelay}s both,`+
+      `jelly-bob ${bobDur}s ease-in-out ${inDelay+2}s infinite`;
+    layer.appendChild(el);
+  });
+}
+
+const SEAHORSE_COLORS=[
+  ['#E8820C','#F5A830','rgba(255,180,80,.55)'],
+  ['#8B44CC','#B06EE8','rgba(180,120,255,.5)'],
+  ['#C8960A','#EFBE20','rgba(255,210,60,.5)'],
+  ['#CC3E7E','#F06AAA','rgba(255,150,200,.5)'],
+  ['#0A8899','#20C4D8','rgba(60,220,240,.45)'],
+];
+function spawnSeahorses(){
+  // Minimal: 3 seahorses spread evenly
+  const positions = _gridPositions(3, 3, 1, 6, 88, 12, 65);
+  positions.forEach((pos, i)=>{
+    const el = document.createElement('div'); el.className='swimmer';
+    const [c,b,f] = SEAHORSE_COLORS[i % SEAHORSE_COLORS.length];
+    el.innerHTML = seahorseSVG(c,b,f);
+    const floatDur = 4 + Math.random() * 3;
+    const inDelay  = i * 2.2;
+    el.style.cssText = `left:${pos.x}%;top:${pos.y}%;`;
+    el.style.animation =
+      `floater-in 2.5s ease-out ${inDelay}s both,`+
+      `seahorse-float ${floatDur}s ease-in-out ${inDelay+2.5}s infinite`;
+    layer.appendChild(el);
+  });
+}
+
+function spawnStarfish(){
+  const {yPct, release} = _claimLane(14, 76);
+  const el = document.createElement('div'); el.className='swimmer';
+  el.innerHTML = starfishSVG();
+  el.style.cssText = `top:${yPct}%;left:0;`;
+  // No delay on starfish so backwards fill doesn't need to hold long
+  _spawn(el, `starfish-drift ${42+Math.random()*18}s linear 0s forwards`,
+    ()=>{ el.remove(); release(); });
+}
+
+function spawnBubbles(){
+  // 3 bubbles max — subtle
+  for(let i = 0; i < 3; i++){
+    const el = document.createElement('div'); el.className='bubble swimmer';
+    const sz = 3 + Math.random() * 12;
+    el.style.cssText =
+      `width:${sz}px;height:${sz}px;`+
+      `left:${Math.random()*93}%;top:${45+Math.random()*48}%;`;
+    const delay = i * 0.9;
+    _spawn(el, `bubble-rise ${3.5+Math.random()*3}s ease-in ${delay}s forwards`,
+      ()=> el.remove());
+  }
+}
+
+function initCreatures(){
+  // Static floaters: appear after ocean is revealed
+  setTimeout(spawnJellyfish,  800);
+  setTimeout(spawnSeahorses, 2400);
+
+  const sched = (fn,base,rand)=>{ fn(); setTimeout(()=>sched(fn,base,rand), base+Math.random()*rand); };
+
+  // Minimal cadence — lots of breathing room between events
+  setTimeout(()=>sched(spawnBubbles,    3000, 3000),  1200);
+  setTimeout(()=>sched(spawnFishSchool, 9000, 8000),  4000);  // one school every ~9-17s
+  setTimeout(()=>sched(spawnStarfish,  22000,14000),  6000);
+  setTimeout(()=>sched(spawnTurtle,    28000,18000),  9000);
+  setTimeout(()=>sched(spawnWhale,     45000,25000), 15000);
+  setTimeout(spawnNemoAndDory, 14000);
+  setTimeout(()=>sched(spawnNemoAndDory,55000,20000), 70000);
+}
+
+/* ══════════════════════════════════════════════════════
+   CORAL REEF — panoramic SVG background for each section
+══════════════════════════════════════════════════════ */
+function coralReefSVG(v=0){
+  // v=0,1,2 gives subtle layout variation
+  const ox=v*80; // horizontal offset for variety
+  return `<svg viewBox="0 0 820 220" preserveAspectRatio="xMidYMax slice"
+    xmlns="http://www.w3.org/2000/svg">
+
+  <!-- ── SANDY / ROCKY SUBSTRATE ───────────────────── -->
+  <path d="M0 185 Q120 175 240 182 Q360 190 480 178 Q600 168 720 178 Q770 183 820 175 L820 220 L0 220Z"
+    fill="#8A6D42" opacity=".32"/>
+  <path d="M0 195 Q100 188 200 193 Q350 200 500 190 Q650 182 820 190 L820 220 L0 220Z"
+    fill="#7A5E35" opacity=".28"/>
+
+  <!-- ── LIGHT RAYS (subtle, from surface) ─────────── -->
+  <path d="M${200+ox} 0 L${150+ox} 220" stroke="rgba(180,230,255,.04)" stroke-width="28"/>
+  <path d="M${420+ox} 0 L${380+ox} 220" stroke="rgba(180,230,255,.03)" stroke-width="20"/>
+  <path d="M${640+ox} 0 L${610+ox} 220" stroke="rgba(180,230,255,.035)" stroke-width="24"/>
+
+  <!-- ══ FAR BACKGROUND CORALS (lighter, depth) ═════ -->
+  <!-- Brain coral far-left -->
+  <ellipse cx="${60+ox}" cy="182" rx="38" ry="25" fill="#C27850" opacity=".45"/>
+  <path d="M26 178 Q38 166 52 176 Q64 166 78 176 Q88 168 96 178"
+    stroke="#8B4A22" stroke-width="2" fill="none" opacity=".4"/>
+  <path d="M28 186 Q42 175 56 186 Q68 176 82 186 Q90 177 96 186"
+    stroke="#8B4A22" stroke-width="2" fill="none" opacity=".38"/>
+
+  <!-- Branching coral far-right -->
+  <line x1="${700+ox}" y1="220" x2="${700+ox}" y2="158" stroke="#D8603A" stroke-width="5" stroke-linecap="round" opacity=".42"/>
+  <line x1="${700+ox}" y1="176" x2="${682+ox}" y2="150" stroke="#D8603A" stroke-width="4"   stroke-linecap="round" opacity=".42"/>
+  <line x1="${700+ox}" y1="176" x2="${718+ox}" y2="152" stroke="#D8603A" stroke-width="4"   stroke-linecap="round" opacity=".42"/>
+  <circle cx="${682+ox}" cy="150" r="4.5" fill="#F08060" opacity=".45"/>
+  <circle cx="${718+ox}" cy="152" r="4.5" fill="#F08060" opacity=".45"/>
+  <circle cx="${700+ox}" cy="158" r="5"   fill="#F08060" opacity=".45"/>
+
+  <!-- Tube sponge cluster far-left-mid -->
+  <ellipse cx="${155+ox}" cy="193" rx="6" ry="18" fill="#8B5090" opacity=".5"/>
+  <ellipse cx="${163+ox}" cy="191" rx="5" ry="15" fill="#A060A8" opacity=".45"/>
+  <ellipse cx="${170+ox}" cy="194" rx="6" ry="17" fill="#8B5090" opacity=".5"/>
+  <!-- Sponge openings -->
+  <ellipse cx="${155+ox}" cy="175" rx="5" ry="3" fill="#1A0A28" opacity=".6"/>
+  <ellipse cx="${163+ox}" cy="176" rx="4" ry="2.5" fill="#1A0A28" opacity=".55"/>
+  <ellipse cx="${170+ox}" cy="177" rx="5" ry="3" fill="#1A0A28" opacity=".6"/>
+
+  <!-- ══ FOREGROUND CORALS (bold, close) ════════════ -->
+
+  <!-- ── Large branching coral LEFT (Acropora) ── -->
+  <line x1="${190+ox}" y1="220" x2="${190+ox}" y2="128" stroke="#E05830" stroke-width="9"   stroke-linecap="round"/>
+  <line x1="${190+ox}" y1="152" x2="${162+ox}" y2="112" stroke="#E05830" stroke-width="7.5" stroke-linecap="round"/>
+  <line x1="${190+ox}" y1="152" x2="${218+ox}" y2="115" stroke="#E05830" stroke-width="7.5" stroke-linecap="round"/>
+  <line x1="${162+ox}" y1="125" x2="${144+ox}" y2="100" stroke="#E05830" stroke-width="6"   stroke-linecap="round"/>
+  <line x1="${162+ox}" y1="125" x2="${178+ox}" y2="102" stroke="#E05830" stroke-width="6"   stroke-linecap="round"/>
+  <line x1="${218+ox}" y1="128" x2="${202+ox}" y2="104" stroke="#E05830" stroke-width="6"   stroke-linecap="round"/>
+  <line x1="${218+ox}" y1="128" x2="${234+ox}" y2="106" stroke="#E05830" stroke-width="6"   stroke-linecap="round"/>
+  <!-- 3rd generation branches -->
+  <line x1="${144+ox}" y1="112" x2="${134+ox}" y2="94"  stroke="#E05830" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="${144+ox}" y1="112" x2="${154+ox}" y2="96"  stroke="#E05830" stroke-width="4.5" stroke-linecap="round"/>
+  <line x1="${234+ox}" y1="118" x2="${244+ox}" y2="100" stroke="#E05830" stroke-width="4.5" stroke-linecap="round"/>
+  <!-- Polyp tips (round, glowing) -->
+  <circle cx="${190+ox}" cy="128" r="6"   fill="#FF9872"/>
+  <circle cx="${162+ox}" cy="112" r="5.5" fill="#FF9872"/>
+  <circle cx="${218+ox}" cy="115" r="5.5" fill="#FF9872"/>
+  <circle cx="${144+ox}" cy="100" r="4.5" fill="#FF9872"/>
+  <circle cx="${178+ox}" cy="102" r="4.5" fill="#FFB090"/>
+  <circle cx="${202+ox}" cy="104" r="4.5" fill="#FF9872"/>
+  <circle cx="${234+ox}" cy="106" r="4.5" fill="#FFB090"/>
+  <circle cx="${134+ox}" cy="94"  r="4"   fill="#FF9872"/>
+  <circle cx="${154+ox}" cy="96"  r="4"   fill="#FFB090"/>
+  <circle cx="${244+ox}" cy="100" r="4"   fill="#FF9872"/>
+  <!-- Coral inner highlight -->
+  <line x1="${190+ox}" y1="220" x2="${190+ox}" y2="128" stroke="rgba(255,180,120,.2)" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- ── Sea Anemone CENTER-LEFT ── -->
+  <ellipse cx="${340+ox}" cy="202" rx="18" ry="9" fill="#A04828" opacity=".7"/>
+  <path d="M328 202 Q323 182 321 168" stroke="#F0609A" stroke-width="4.5" fill="none" stroke-linecap="round" opacity=".85"/>
+  <path d="M333 202 Q330 180 334 165" stroke="#FF80B0" stroke-width="4.5" fill="none" stroke-linecap="round" opacity=".85"/>
+  <path d="M340 202 Q338 178 342 163" stroke="#F0609A" stroke-width="4.5" fill="none" stroke-linecap="round" opacity=".85"/>
+  <path d="M347 202 Q349 180 345 165" stroke="#FF80B0" stroke-width="4.5" fill="none" stroke-linecap="round" opacity=".85"/>
+  <path d="M352 202 Q357 182 353 168" stroke="#F0609A" stroke-width="4.5" fill="none" stroke-linecap="round" opacity=".85"/>
+  <!-- Anemone tentacle tips (bulbous) -->
+  <circle cx="${321+ox}" cy="168" r="5"   fill="#FF5090"/>
+  <circle cx="${334+ox}" cy="165" r="5"   fill="#FF70A8"/>
+  <circle cx="${342+ox}" cy="163" r="5.5" fill="#FF5090"/>
+  <circle cx="${345+ox}" cy="165" r="5"   fill="#FF70A8"/>
+  <circle cx="${353+ox}" cy="168" r="5"   fill="#FF5090"/>
+  <!-- Anemone center glow -->
+  <ellipse cx="${340+ox}" cy="198" rx="8" ry="5" fill="rgba(255,120,160,.3)"/>
+
+  <!-- ── Large Brain Coral CENTER ── -->
+  <ellipse cx="${500+ox}" cy="187" rx="58" ry="38" fill="#C87848" opacity=".78"/>
+  <ellipse cx="${500+ox}" cy="183" rx="48" ry="30" fill="#B86838" opacity=".55"/>
+  <!-- Brain coral meanders (convolutions) -->
+  <path d="M452 180 Q464 164 478 177 Q490 164 504 177 Q516 164 530 177 Q542 164 550 177"
+    stroke="#7A3818" stroke-width="2.8" fill="none" opacity=".65"/>
+  <path d="M454 190 Q468 175 484 188 Q496 175 510 188 Q524 175 538 188 Q548 177 550 188"
+    stroke="#7A3818" stroke-width="2.8" fill="none" opacity=".62"/>
+  <path d="M458 200 Q474 186 490 199 Q503 186 518 199 Q532 186 544 199"
+    stroke="#7A3818" stroke-width="2.5" fill="none" opacity=".55"/>
+  <path d="M462 210 Q478 197 494 209 Q508 197 522 209 Q535 198 542 208"
+    stroke="#7A3818" stroke-width="2" fill="none" opacity=".45"/>
+  <!-- Brain coral highlight -->
+  <ellipse cx="${486+ox}" cy="170" rx="24" ry="12" fill="rgba(255,200,140,.13)"/>
+
+  <!-- ── Purple Sea Fan RIGHT ── -->
+  <line x1="${660+ox}" y1="220" x2="${660+ox}" y2="140" stroke="#7A3A98" stroke-width="6" stroke-linecap="round" opacity=".75"/>
+  <!-- Fan blades (left side) -->
+  <path d="M${660+ox} 144 Q${638+ox} 136 ${624+ox} 144 Q${628+ox} 152 ${644+ox} 149 Q${654+ox} 147 ${660+ox} 144Z"
+    fill="#9B52B8" opacity=".55"/>
+  <path d="M${660+ox} 156 Q${636+ox} 148 ${622+ox} 156 Q${626+ox} 164 ${642+ox} 161 Q${653+ox} 158 ${660+ox} 156Z"
+    fill="#9B52B8" opacity=".52"/>
+  <path d="M${660+ox} 168 Q${638+ox} 160 ${624+ox} 168 Q${628+ox} 176 ${644+ox} 173 Q${654+ox} 170 ${660+ox} 168Z"
+    fill="#9B52B8" opacity=".48"/>
+  <path d="M${660+ox} 180 Q${640+ox} 172 ${626+ox} 180 Q${630+ox} 188 ${646+ox} 185 Q${655+ox} 182 ${660+ox} 180Z"
+    fill="#9B52B8" opacity=".45"/>
+  <!-- Fan blades (right side) -->
+  <path d="M${660+ox} 144 Q${682+ox} 136 ${696+ox} 144 Q${692+ox} 152 ${676+ox} 149 Q${666+ox} 147 ${660+ox} 144Z"
+    fill="#9B52B8" opacity=".55"/>
+  <path d="M${660+ox} 156 Q${684+ox} 148 ${698+ox} 156 Q${694+ox} 164 ${678+ox} 161 Q${667+ox} 158 ${660+ox} 156Z"
+    fill="#9B52B8" opacity=".52"/>
+  <path d="M${660+ox} 168 Q${682+ox} 160 ${696+ox} 168 Q${692+ox} 176 ${676+ox} 173 Q${666+ox} 170 ${660+ox} 168Z"
+    fill="#9B52B8" opacity=".48"/>
+  <path d="M${660+ox} 180 Q${680+ox} 172 ${694+ox} 180 Q${690+ox} 188 ${674+ox} 185 Q${665+ox} 182 ${660+ox} 180Z"
+    fill="#9B52B8" opacity=".45"/>
+  <!-- Fan polyp details -->
+  <path d="M${625+ox} 144 Q${660+ox} 140 ${695+ox} 144" stroke="#C080E0" stroke-width=".8" fill="none" opacity=".4"/>
+  <path d="M${623+ox} 156 Q${660+ox} 152 ${697+ox} 156" stroke="#C080E0" stroke-width=".8" fill="none" opacity=".4"/>
+  <path d="M${625+ox} 168 Q${660+ox} 164 ${695+ox} 168" stroke="#C080E0" stroke-width=".8" fill="none" opacity=".4"/>
+
+  <!-- ── Seagrass patch CENTER ── -->
+  <path d="M${400+ox} 220 Q${395+ox} 196 ${390+ox} 178" stroke="#2A8050" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M${406+ox} 220 Q${410+ox} 194 ${408+ox} 174" stroke="#38A862" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M${412+ox} 220 Q${416+ox} 198 ${422+ox} 180" stroke="#2A8050" stroke-width="3"   fill="none" stroke-linecap="round"/>
+  <path d="M${396+ox} 220 Q${390+ox} 196 ${384+ox} 180" stroke="#38A862" stroke-width="3"   fill="none" stroke-linecap="round"/>
+  <path d="M${418+ox} 220 Q${424+ox} 200 ${428+ox} 184" stroke="#2A8050" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+  <path d="M${390+ox} 220 Q${384+ox} 198 ${380+ox} 186" stroke="#38A862" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- ── Small coral clusters / rubble ── -->
+  <circle cx="${270+ox}" cy="202" r="9"   fill="#E06840" opacity=".62"/>
+  <circle cx="${280+ox}" cy="197" r="7"   fill="#E87858" opacity=".58"/>
+  <circle cx="${258+ox}" cy="206" r="7.5" fill="#FF8860" opacity=".52"/>
+  <circle cx="${272+ox}" cy="193" r="5"   fill="#FFB090" opacity=".48"/>
+
+  <circle cx="${570+ox}" cy="200" r="8"   fill="#E06840" opacity=".6"/>
+  <circle cx="${560+ox}" cy="195" r="6.5" fill="#FF8860" opacity=".55"/>
+  <circle cx="${578+ox}" cy="197" r="7"   fill="#E06840" opacity=".58"/>
+
+  <!-- ── Tube worms / Christmas tree worms ── -->
+  <line x1="${360+ox}" y1="220" x2="${357+ox}" y2="198" stroke="#38C8D0" stroke-width="2.8" stroke-linecap="round" opacity=".75"/>
+  <path d="M${357+ox} 198 Q${350+ox} 192 ${354+ox} 188 Q${360+ox} 192 ${357+ox} 198" fill="#38C8D0" opacity=".7"/>
+  <path d="M${357+ox} 198 Q${364+ox} 192 ${360+ox} 187 Q${354+ox} 192 ${357+ox} 198" fill="#50E0E8" opacity=".6"/>
+  <line x1="${368+ox}" y1="220" x2="${371+ox}" y2="194" stroke="#F090D0" stroke-width="2.8" stroke-linecap="round" opacity=".75"/>
+  <path d="M${371+ox} 194 Q${364+ox} 188 ${368+ox} 184 Q${374+ox} 188 ${371+ox} 194" fill="#F090D0" opacity=".7"/>
+  <path d="M${371+ox} 194 Q${378+ox} 188 ${374+ox} 183 Q${368+ox} 188 ${371+ox} 194" fill="#FFB0E0" opacity=".6"/>
+  <line x1="${376+ox}" y1="220" x2="${374+ox}" y2="201" stroke="#38C8D0" stroke-width="2.5" stroke-linecap="round" opacity=".65"/>
+  <path d="M${374+ox} 201 Q${368+ox} 196 ${371+ox} 192 Q${377+ox} 196 ${374+ox} 201" fill="#38C8D0" opacity=".6"/>
+  <path d="M${374+ox} 201 Q${380+ox} 196 ${376+ox} 191 Q${370+ox} 196 ${374+ox} 201" fill="#50E0E8" opacity=".5"/>
+
+  <!-- ── Small sea anemone right-side ── -->
+  <ellipse cx="${760+ox}" cy="205" rx="12" ry="6" fill="#903828" opacity=".65"/>
+  <path d="M752 205 Q749 192 748 184" stroke="#E07080" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".8"/>
+  <path d="M756 205 Q754 190 756 182" stroke="#F090A0" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".8"/>
+  <path d="M761 205 Q760 188 763 181" stroke="#E07080" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".8"/>
+  <path d="M766 205 Q768 190 766 182" stroke="#F090A0" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".8"/>
+  <path d="M770 205 Q773 192 771 184" stroke="#E07080" stroke-width="3.5" fill="none" stroke-linecap="round" opacity=".8"/>
+  <circle cx="${748+ox}" cy="184" r="4" fill="#FF6080"/>
+  <circle cx="${756+ox}" cy="182" r="4" fill="#FF80A0"/>
+  <circle cx="${763+ox}" cy="181" r="4" fill="#FF6080"/>
+  <circle cx="${766+ox}" cy="182" r="4" fill="#FF80A0"/>
+  <circle cx="${771+ox}" cy="184" r="4" fill="#FF6080"/>
+
+  <!-- ── Seagrass right ── -->
+  <path d="M${740+ox} 220 Q${736+ox} 198 ${732+ox} 180" stroke="#2A8050" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M${746+ox} 220 Q${750+ox} 196 ${748+ox} 178" stroke="#38A862" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+  <path d="M${752+ox} 220 Q${756+ox} 200 ${760+ox} 182" stroke="#2A8050" stroke-width="3"   fill="none" stroke-linecap="round"/>
+  <path d="M${736+ox} 220 Q${728+ox} 198 ${724+ox} 184" stroke="#38A862" stroke-width="3"   fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+
+/* ── BOOT ───────────────────────────────────────────── */
+window.addEventListener('load',()=>{
+  initBioCanvas();
+  initCreatures();
+  // Single fixed coral reef — stays pinned to bottom while content scrolls
+  const _reef=document.createElement('div');
+  _reef.className='reef-layer';
+  _reef.innerHTML=coralReefSVG(0);
+  document.body.appendChild(_reef);
+});
+</script>
+</body>
+</html>
